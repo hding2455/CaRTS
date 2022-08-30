@@ -19,11 +19,45 @@ This repo hosts the code for implementing the CaRTS algorithms for Robot Tool se
 ## Installation
 
 
-## Model Zoo
+### We created an environment.yml for creating the exact same conda envrionment that we ran the code on,You can simply install the environment by this conda command:
 
+    conda env create -f environment.yml
+
+### Our CUDA VERSION is:
+    
+    Cuda compilation tools, release 11.6, V11.6.124
+
+### Our GPU DRIVER VERSION is:
+
+    510.60.02
 
 
 ## Usage
+
+We only used one GPU for training and inference so we haven't implement multi-gpu version.
+
+### To run training, find the right name for the config you want in the ![file](config/__init__.py):
+
+python train_nn.py <config_name>
+
+### for example:
+
+python train_nn.py CaRTSACSCTS
+
+### To run inference, give the name of the config and the path to the checkpoint file for networks to load:
+
+python test.py <config_name> <path_to_checkpoint>
+
+### for example:
+
+python test.py CaRTSACSCTS ../CaRTS/checkpoints/carts_base_cts/model_49.pth
+
+## Dataset preparation:
+
+We are working on make a more comprehensive version of the causal tool segmentation dataset. If you need the dataset that is used in this paper, please contact Hao Ding ([email](mailto:hding15@jhu.edu)) and Mathias Unberath([email](mailto:unberath@jhu.edu)）.
+
+If you want to use your own dataset please write your own dataloader with the same format that the files in the dataset folder has.
+
 
 
 ## Citations
