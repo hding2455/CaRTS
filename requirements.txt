@@ -1,6 +1,0 @@
-numpy
-torch
-torchvision
-scipy
-opencv-python
-PIL
