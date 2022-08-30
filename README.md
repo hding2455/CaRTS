@@ -56,7 +56,7 @@ python test.py CaRTSACSCTS ../CaRTS/checkpoints/carts_base_cts/model_49.pth
 
 We are working on make a more comprehensive version of the causal tool segmentation dataset. If you need the dataset that is used in this paper, please contact Hao Ding ([email](mailto:hding15@jhu.edu)) and Mathias Unberath([email](mailto:unberath@jhu.edu)）.
 
-If you want to use your own dataset please write your own dataloader with the same format that the files in the dataset folder has.
+If you want to use your own dataset please write your own dataloader with the same format that as the files in the dataset folder.
 
 
 
