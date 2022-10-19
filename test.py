@@ -64,8 +64,7 @@ def evaluate(model, dataloader, device, network_out = False, perturbation=None, 
             original_kinematics = kinematics.numpy()
             mask = torch.zeros_like(kinematics)
             mask[:, :, 0] = 1
-            #kinematics_noise = random.randint(0,4) / 180 * 3.14159
-            kinematics = kinematics + kinematics_noise * mask#torch.sign((torch.rand_like(kinematics) - 0.5)) * mask
+            kinematics = kinematics + kinematics_noise * mask
         data['image'] = image.to(device=device)
         data['gt'] = gt.to(device=device)
         data['kinematics'] = kinematics.to(device=device)

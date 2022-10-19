@@ -80,7 +80,6 @@ class Unet(nn.Module):
         super(Unet, self).__init__()
         self.size = params['size']
         modules = []
-        print(params.keys())
         self.criterion = params['criterion']
         self.target_size = params['target_size']
         hidden_dims = params['hidden_dims']

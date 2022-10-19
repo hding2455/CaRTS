@@ -90,7 +90,7 @@ class CausalToolSeg(data.Dataset):
         return images, gts, kinematics_s
 
 if __name__ == '__main__':
-    cts = CausalToolSeg('/data/hao/causal_tool_seg/', ['set-1', 'set-2'], ['regular', 'blood'])
+    cts = CausalToolSeg('/data/hao/causal_tool_seg/', ['set-1', 'set-2'], ['regular', 'blood'], series_length=5)
     x = cts[0]
     y = cts[865]
     print(x[0].shape, x[1].shape, x[2].shape)

@@ -85,6 +85,6 @@ class AMBFSim(data.Dataset):
         return images, gts, kinematics_s
 
 if __name__ == '__main__':
-    ambf_sim = AMBFSim('/data/hao/new_ambf_dataset', ['Video_01', 'Video_02', 'Video_03', 'Video_04'])
+    ambf_sim = AMBFSim('/data/hao/new_ambf_dataset', ['Video_01', 'Video_02', 'Video_03', 'Video_04'], series_length=5)
     a = ambf_sim[0]
     print(a[0].shape, a[1].shape, a[2].shape)
