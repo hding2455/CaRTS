@@ -64,10 +64,12 @@ If you want to use your own dataset please write your own dataloader with the sa
 Please consider citing our papers in your publications if this repo helps you. 
 ```
 @inproceedings{ding2022carts,
-  title     =  {CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data},
-  author    =  {Ding, Hao and Zhang, Jintan and Kazanzides, Peter and Wu, Jie Ying and Unberath, Mathias},
-  booktitle =  {Proc. MICCAI},
-  year      =  {2022}
+  title={CaRTS: Causality-Driven Robot Tool Segmentation from Vision and Kinematics Data},
+  author={Ding, Hao and Zhang, Jintan and Kazanzides, Peter and Wu, Jie Ying and Unberath, Mathias},
+  booktitle={International Conference on Medical Image Computing and Computer-Assisted Intervention},
+  pages={387--398},
+  year={2022},
+  organization={Springer}
 }
 ```
 
