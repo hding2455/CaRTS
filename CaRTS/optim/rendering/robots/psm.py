@@ -40,6 +40,7 @@ class PSM(nn.Module):
         # Delta between tool tip and the Remote Center of Motion
         self.scale = 1.0
         self.baseT = nn.Parameter(torch.tensor(baseT).to(device=device, dtype=torch.float32))
+        print(self.baseT.requires_grad)
         
         self.tool_joint_limits = PI_2
 

@@ -1,5 +1,6 @@
-from torch.optim import  SGD, Adam
-from torch.nn import BCELoss, CrossEntropyLoss
+from torch.optim import  SGD, Adam, AdamW
+from datasets import SmokeNoise
+from torch.nn import BCELoss, CrossEntropyLoss, ReLU
 from torch.optim.lr_scheduler import StepLR
 from torch.nn import BCELoss, SmoothL1Loss
 from torch.optim.lr_scheduler import StepLR
@@ -69,6 +70,12 @@ tool_DH2Mesh = [
                       [ 0.0, 0.0, 0.0, 1.0]]
         ]
 
+def dice_loss(pred, gt):
+    loss = 1 - 2 * (pred * gt).sum() / (pred.sum() + gt.sum() + 1e-10)
+    return loss
+
+input_len = 3
+
 class cfg:
     train_dataset = dict(
         name = "CausalToolSeg",
@@ -82,48 +89,73 @@ class cfg:
     validation_dataset = dict(
         name = "CausalToolSeg",
         args = dict(
-            series_length = 1,
+            series_length = input_len,
             folder_path = "/data/hao/processed_data",
-            video_paths = ["set-11"],
-            subset_paths = ["blood"]))
+            video_paths = ["set-12"],
+            subset_paths = ["regular"]))
     carts = dict(
-        name = "CaRTSBase",
+        name = "mCaRTS",
         params = dict(
             vision = dict(
-                name = "STM",
+                name = "Unet",
                 params = dict(
-                    criterion = CrossEntropyLoss(),
+                    input_dim = 3,
+                    hidden_dims = [512, 256, 128, 64, 32],
+                    size = (15, 20),
+                    target_size = (360, 500),
+                    criterion = BCELoss(),
                     train_params = dict(
+                        lr_scheduler = dict(
+                            lr_scheduler_class = StepLR,
+                            args = dict(
+                                step_size=5,
+                                gamma=0.1)),
+                        optimizer = dict(
+                            optim_class = SGD,
+                            args = dict(
+                                lr = 0.1,
+                                momentum = 0.9,
+                                weight_decay = 10e-5)),
+                        max_epoch_number=20,
+                        save_interval=5,
+                        save_path='./checkpoints/mcarts_unet_cts/',
+                        log_interval=50))),
+            optim = dict(
+                name = "mCaRTSMLPOptim",
+                params = dict(
+                    train_params = dict(
+                        #perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
                         lr_scheduler = dict(
                             lr_scheduler_class = StepLR,
                             args = dict(
                                 step_size=20,
                                 gamma=0.1)),
                         optimizer = dict(
-                            optim_class = SGD,
+                            optim_class = Adam,
                             args = dict(
-                                lr = 0.01,
-                                momentum = 0.9,
-                                weight_decay = 10e-5)),
-                        max_epoch_number=50,
+                                lr = 1e-4)),
+                        max_epoch_number=10,
                         save_interval=10,
-                        save_path='./checkpoints/mcarts_cts/',
-                        log_interval=50))),
-            optim = dict(
-                name = "AttFeatureCosSimOptim",
-                params = dict(
+                        save_path='./checkpoints/mcarts_corrector_cts/',
+                        log_interval=50,
+                        criterion=dice_loss),
+                    corrector = dict(
+                        dims = [input_len, 32, 64, 128, 64, 32],
+                        activation = ReLU
+                        ),
                     optimizer = dict(
                         optim_class = Adam,
                         args = dict(
-                            lr = 1e-3)),
+                            lr = 5e-5,
+                            )),
                     lr_scheduler = dict(
                         lr_scheduler_class = StepLR,
                         args = dict(
-                        step_size=5,
+                        step_size=20,
                         gamma=0.9)),
                     background_image = '/data/hao/processed_data/mean_background_l.png',
                     grad_limit = 1.0,
-                    iteration_num = 30,
+                    iteration_num = 10,
                     optimize_cameras=False,
                     optimize_kinematics=True,
                     ref_threshold=0.5,
@@ -154,6 +186,6 @@ class cfg:
                                                                L_rcc = 4.318)
                                                  }],
                             render_params = {'blend_params':dict(sigma=1e-4, gamma=1e-4),
-                                             'raster_settings_silhouette':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=150),
-                                             'raster_settings_image':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=1),
+                                             'raster_settings_silhouette':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=150),#, perspective_correct=False),
+                                             'raster_settings_image':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=1),#, perspective_correct=False),
                                              'lights':dict(name='PointLights', args=dict(location=((0.0, 0.0, 0.0),)))}))))))

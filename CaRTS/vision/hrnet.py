@@ -486,8 +486,58 @@ class HRNet(nn.Module):
         else:
             return result.sigmoid()
 
+    def get_feature_map(self, data):
+        x = data['image']
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu(x)
+        x = self.layer1(x)
+
+        x_list = []
+        for i in range(self.stage2_cfg['NUM_BRANCHES']):
+            if self.transition1[i] is not None:
+                x_list.append(self.transition1[i](x))
+            else:
+                x_list.append(x)
+        y_list = self.stage2(x_list)
+
+        x_list = []
+        for i in range(self.stage3_cfg['NUM_BRANCHES']):
+            if self.transition2[i] is not None:
+                if i < self.stage2_cfg['NUM_BRANCHES']:
+                    x_list.append(self.transition2[i](y_list[i]))
+                else:
+                    x_list.append(self.transition2[i](y_list[-1]))
+            else:
+                x_list.append(y_list[i])
+        y_list = self.stage3(x_list)
+
+        x_list = []
+        for i in range(self.stage4_cfg['NUM_BRANCHES']):
+            if self.transition3[i] is not None:
+                if i < self.stage3_cfg['NUM_BRANCHES']:
+                    x_list.append(self.transition3[i](y_list[i]))
+                else:
+                    x_list.append(self.transition3[i](y_list[-1]))
+            else:
+                x_list.append(y_list[i])
+        x = self.stage4(x_list)
+
+        # Upsampling
+        x0_h, x0_w = x[0].size(2), x[0].size(3)
+        x0 = F.interpolate(x[0], size=self.target_size, mode='bilinear', align_corners=ALIGN_CORNERS)
+        x1 = F.interpolate(x[1], size=self.target_size, mode='bilinear', align_corners=ALIGN_CORNERS)
+        x2 = F.interpolate(x[2], size=self.target_size, mode='bilinear', align_corners=ALIGN_CORNERS)
+        x3 = F.interpolate(x[3], size=self.target_size, mode='bilinear', align_corners=ALIGN_CORNERS)
+
+        x = torch.cat([x0, x1, x2, x3], 1)
+        return x
 
     def load_parameters(self, load_path):
+        print(type(torch.load(load_path, map_location=self.device)))
         self.load_state_dict(torch.load(load_path, map_location=self.device)['state_dict'])
 
     def init_weights(self, pretrained='',):

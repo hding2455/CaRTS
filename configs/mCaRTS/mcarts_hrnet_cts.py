@@ -1,5 +1,6 @@
 from torch.optim import  SGD, Adam
-from torch.nn import BCELoss
+from datasets import SmokeNoise
+from torch.nn import BCELoss, CrossEntropyLoss, ReLU
 from torch.optim.lr_scheduler import StepLR
 from torch.nn import BCELoss, SmoothL1Loss
 from torch.optim.lr_scheduler import StepLR
@@ -69,6 +70,10 @@ tool_DH2Mesh = [
                       [ 0.0, 0.0, 0.0, 1.0]]
         ]
 
+def dice_loss(pred, gt):
+    loss = 1 - 2 * (pred * gt).sum() / (pred.sum() + gt.sum() + 1e-10)
+    return loss
+
 class cfg:
     train_dataset = dict(
         name = "CausalToolSeg",
@@ -85,19 +90,47 @@ class cfg:
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-11"],
-            subset_paths = ["alternative_bg"]))
+            subset_paths = ["regular"]))
     carts = dict(
-        name = "CaRTSBase",
+        name = "mCaRTS",
         params = dict(
             vision = dict(
-                name = "Unet",
+                name = "HRNet",
                 params = dict(
-                    input_dim = 3,
-                    hidden_dims = [512, 256, 128, 64, 32],
-                    size = (15, 20),
-                    target_size = (360, 500),
+                    align_corners = True,
+                    target_size = (360, 480),
+                    model_param = dict(
+                        STAGE1 = dict(
+                            NUM_MODULES = 1,
+                            NUM_BRANCHES = 1,
+                            BLOCK = "BOTTLENECK",
+                            NUM_BLOCKS = [4],
+                            NUM_CHANNELS = [64],
+                            FUSE_METHOD = 'SUM'),
+                        STAGE2 = dict(
+                            NUM_MODULES = 1,
+                            NUM_BRANCHES = 2,
+                            BLOCK = "BASIC",
+                            NUM_BLOCKS = [4, 4],
+                            NUM_CHANNELS = [48, 96],
+                            FUSE_METHOD = 'SUM'),
+                        STAGE3 = dict(
+                            NUM_MODULES = 4,
+                            NUM_BRANCHES = 3,
+                            BLOCK = "BASIC",
+                            NUM_BLOCKS = [4,4,4],
+                            NUM_CHANNELS = [48, 96, 192],
+                            FUSE_METHOD = 'SUM'),
+                        STAGE4 = dict(
+                            NUM_MODULES = 3,
+                            NUM_BRANCHES = 4,
+                            BLOCK = "BASIC",
+                            NUM_BLOCKS = [4,4,4,4],
+                            NUM_CHANNELS = [48, 96, 192,384],
+                            FUSE_METHOD = 'SUM')),
                     criterion = BCELoss(),
                     train_params = dict(
+                        perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
                         lr_scheduler = dict(
                             lr_scheduler_class = StepLR,
                             args = dict(
@@ -110,24 +143,43 @@ class cfg:
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
                         max_epoch_number=50,
-                        save_interval=10,
-                        save_path='./checkpoints/carts_base_cts/',
+                        save_interval=5,
+                        save_path='./checkpoints/mcarts_cts_hrnet_smoke/',
                         log_interval=50))),
             optim = dict(
-                name = "AttFeatureCosSimOptim",
+                name = "mCaRTSMLPOptim",
                 params = dict(
+                    train_params = dict(
+                        lr_scheduler = dict(
+                            lr_scheduler_class = StepLR,
+                            args = dict(
+                                step_size=20,
+                                gamma=0.1)),
+                        optimizer = dict(
+                            optim_class = Adam,
+                            args = dict(
+                                lr = 1e-4)),
+                        max_epoch_number=10,
+                        save_interval=10,
+                        save_path='./checkpoints/mcarts_corrector_cts/',
+                        log_interval=50,
+                        criterion=dice_loss),
+                    corrector = dict(
+                        dims = [5, 32, 128, 128, 128, 128, 32],
+                        activation = ReLU
+                        ),
                     optimizer = dict(
                         optim_class = Adam,
                         args = dict(
-                            lr = 1e-3)),
+                            lr = 1e-4)),
                     lr_scheduler = dict(
                         lr_scheduler_class = StepLR,
                         args = dict(
-                        step_size=5,
+                        step_size=20,
                         gamma=0.9)),
                     background_image = '/data/hao/processed_data/mean_background_l.png',
                     grad_limit = 1.0,
-                    iteration_num = 1,
+                    iteration_num = 3,
                     optimize_cameras=False,
                     optimize_kinematics=True,
                     ref_threshold=0.5,

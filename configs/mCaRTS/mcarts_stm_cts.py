@@ -1,5 +1,5 @@
 from torch.optim import  SGD, Adam
-from torch.nn import BCELoss
+from torch.nn import BCELoss, CrossEntropyLoss
 from torch.optim.lr_scheduler import StepLR
 from torch.nn import BCELoss, SmoothL1Loss
 from torch.optim.lr_scheduler import StepLR
@@ -85,18 +85,14 @@ class cfg:
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-11"],
-            subset_paths = ["alternative_bg"]))
+            subset_paths = ["regular"]))
     carts = dict(
         name = "CaRTSBase",
         params = dict(
             vision = dict(
-                name = "Unet",
+                name = "STM",
                 params = dict(
-                    input_dim = 3,
-                    hidden_dims = [512, 256, 128, 64, 32],
-                    size = (15, 20),
-                    target_size = (360, 500),
-                    criterion = BCELoss(),
+                    criterion = CrossEntropyLoss(),
                     train_params = dict(
                         lr_scheduler = dict(
                             lr_scheduler_class = StepLR,
@@ -110,8 +106,8 @@ class cfg:
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
                         max_epoch_number=50,
-                        save_interval=10,
-                        save_path='./checkpoints/carts_base_cts/',
+                        save_interval=5,
+                        save_path='./checkpoints/mcarts_cts/',
                         log_interval=50))),
             optim = dict(
                 name = "AttFeatureCosSimOptim",
@@ -158,6 +154,6 @@ class cfg:
                                                                L_rcc = 4.318)
                                                  }],
                             render_params = {'blend_params':dict(sigma=1e-4, gamma=1e-4),
-                                             'raster_settings_silhouette':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=150),#, perspective_correct=False),
-                                             'raster_settings_image':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=1),#, perspective_correct=False),
+                                             'raster_settings_silhouette':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=150, perspective_correct=False),
+                                             'raster_settings_image':dict(image_size=(360,480), blur_radius=0, faces_per_pixel=1, perspective_correct=False),
                                              'lights':dict(name='PointLights', args=dict(location=((0.0, 0.0, 0.0),)))}))))))

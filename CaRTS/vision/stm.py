@@ -51,7 +51,6 @@ def pad_divide_by(in_list, d, in_size):
         out_list.append(F.pad(inp, pad_array))
     return out_list, pad_array 
 
-print('Space-time Memory Networks: initialized.')
  
 class ResBlock(nn.Module):
     def __init__(self, indim, outdim=None, stride=1):
@@ -237,7 +236,7 @@ class STM(nn.Module):
         return pad_mems
 
     def memorize(self, data):
-        frame, masks, num_objects = data['image'], data['gt'], data['num_objects']
+        frame, masks, num_objects = data['image'], data['masks'], data['num_objects']
         # memorize a frame 
         num_objects = num_objects[0].item()
         one_hot_masks = torch.zeros(masks.shape[0], num_objects + 1, masks.shape[2], masks.shape[3]).to(dtype = masks.dtype, device = masks.device)
@@ -306,6 +305,38 @@ class STM(nn.Module):
 
         return logit    
 
+    def forward(self, data):
+        data['num_objects'] = torch.tensor([1]).to(device=self.device)
+        i = data['iteration']
+        if i == 0:
+            data['masks'] = data['gt']
+            with torch.no_grad():
+                self.initial_key, self.initial_value = self.memorize(data)
+            return data['gt']
+        elif i == 1:
+            self.decode_keys = self.initial_key
+            self.decode_values = self.initial_value
+        else:
+            self.decode_keys = torch.cat([self.decode_keys, self.prev_key], dim=3)
+            self.decode_values = torch.cat([self.decode_values, self.prev_value], dim=3)
+        data['keys'] = self.decode_keys
+        data['values'] = self.decode_values
+        logit = self.segment(data)
+        #loss = self.criterion(logit, data['gt'][:,0,:,:].to(dtype=torch.long))
+        pred = F.softmax(logit, dim=1)[:,1].unsqueeze(dim=1)
+        with torch.no_grad():
+            data['masks'] = data['gt']
+            self.prev_key, self.prev_value = self.memorize(data)
+        if self.decode_keys.shape[3] >= 5:
+            self.decode_keys = self.decode_keys[:,:,:,-4:]
+        if self.decode_values.shape[3] >= 5:
+            self.decode_values = self.decode_values[:,:,:,-4:]
+        return pred
+
+    def load_parameters(self, load_path):
+        state_dict = torch.load(load_path, map_location=self.device)['state_dict']
+        self.load_state_dict(torch.load(load_path, map_location=self.device)['state_dict'])
+
     def train_epochs(self, train_dataloader, validation_dataloader, load_path=None):
         train_params = self.train_params
         optimizer = train_params['optimizer']
@@ -342,7 +373,7 @@ class STM(nn.Module):
                 data['gt'] = gt.to(device=device)
                 data['kinematics'] = kinematics.to(device=device)
                 data['num_objects'] = torch.tensor([1]).to(device=self.device)
-                #pred, loss = self.forward(data, return_loss=True)
+                data['masks'] = data['gt']
                 
                 if i == 0:
                     with torch.no_grad():
@@ -352,8 +383,10 @@ class STM(nn.Module):
                     decode_keys =  initial_key
                     decode_values = initial_value
                 else:
-                    decode_keys = torch.cat([decode_keys, prev_key], dim=3)
-                    decode_values = torch.cat([decode_values, prev_values], dim=3)
+                    tmp_keys = decode_keys
+                    tmp_values = decode_values
+                    decode_keys = torch.cat([tmp_keys, prev_key], dim=3)
+                    decode_values = torch.cat([decode_values, prev_value], dim=3)
 
                 data['keys'] = decode_keys
                 data['values'] = decode_values
@@ -367,7 +400,7 @@ class STM(nn.Module):
                 elapsed = time.time() - start
                 
                 with torch.no_grad():
-                    prev_key, prev_values = self.memorize(data)
+                    prev_key, prev_value = self.memorize(data)
                 if decode_keys.shape[3] >= 5:
                     decode_keys = decode_keys[:,:,:,-4:]
                 if decode_values.shape[3] >= 5:
@@ -390,10 +423,12 @@ class STM(nn.Module):
                 validation_loss = 0
                 start = time.time()
                 for i, (image, gt, kinematics) in enumerate(validation_dataloader):
+                    data = {}
                     data['image'] = image.to(device=device)
                     data['gt'] = gt.to(device=device)
                     data['kinematics'] = kinematics.to(device=device)
                     data['num_objects'] = torch.tensor([1]).to(device=self.device)
+                    data['masks'] = data['gt']
 
                     if i == 0:
                         with torch.no_grad():
@@ -404,13 +439,18 @@ class STM(nn.Module):
                         decode_values = initial_value
                     else:
                         decode_keys = torch.cat([decode_keys, prev_key], dim=3)
-                        decode_values = torch.cat([decode_values, prev_values], dim=3)
+                        decode_values = torch.cat([decode_values, prev_value], dim=3)
                     data['keys'] = decode_keys
                     data['values'] = decode_values
                     logit = self.segment(data)
 
                     loss = self.criterion(logit, data['gt'][:,0,:,:].to(dtype=torch.long))
-                    #pred, loss = self.forward(data, return_loss=True)
+                    with torch.no_grad():
+                        prev_key, prev_value = self.memorize(data)
+                        if decode_keys.shape[3] >= 5:
+                            decode_keys = decode_keys[:,:,:,-4:]
+                        if decode_values.shape[3] >= 5:
+                            decode_values = decode_values[:,:,:,-4:]
                     validation_loss += loss.item()
                 elapsed = time.time() - start
                 print("Validation at epch : %d Validation Loss: %f iteration per Sec: %f" %

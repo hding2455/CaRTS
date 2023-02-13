@@ -4,6 +4,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from CaRTS.loss import SSIM
+import torchvision.transforms as transforms
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
@@ -80,7 +82,8 @@ class Unet(nn.Module):
         super(Unet, self).__init__()
         self.size = params['size']
         modules = []
-        self.criterion = params['criterion']
+        self.criterion = SSIM()#params['criterion']
+        self.transform = transforms.Grayscale()
         self.target_size = params['target_size']
         hidden_dims = params['hidden_dims']
         input_dim = params['input_dim']
@@ -130,8 +133,9 @@ class Unet(nn.Module):
         result = self.up4(result, x1)
         result = self.outc(result)
         if return_loss:
-            gt = x['gt']
-            loss = self.criterion(result.sigmoid(), gt)
+            gt = self.transform(x['image']) / 255.0#x['gt']
+            loss = 1-self.criterion(result.sigmoid(), gt)#self.criterion(result.sigmoid(), gt)
+
             return result, loss
         else:
             return result.sigmoid()

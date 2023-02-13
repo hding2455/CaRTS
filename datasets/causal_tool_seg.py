@@ -61,7 +61,7 @@ class CausalToolSeg(data.Dataset):
         for i in range(self.series_length):
             image = np.array(Image.open(self.image_paths[idx+i])).astype(np.float32)
             gt = (np.array(Image.open(self.gt_paths[idx+i]))/255).astype(np.float32)
-            kinematics = self.kinematics[idx+i]
+            kinematics = (self.kinematics[idx+i]).astype(np.float32)
             if self.image_transforms is None:
                 image = T.ToTensor()(image)
             else:
