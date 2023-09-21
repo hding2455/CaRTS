@@ -8,12 +8,13 @@ import torch
 import numpy as np
 
 class AttFeatureCosSimOptim(nn.Module):
-    def __init__(self, optim_params, net, device):
+    def __init__(self, optim_params, net, device, check_NaN=False):
         super().__init__()
         self.net = net
         self.device = device
         self.render = build_render(optim_params['render'], device)
         self.optim_params = optim_params
+        self.check_NaN = check_NaN
     
     def feature_sim_loss(self, net, load_image, render_image, attention_map):
         cos = CosineSimilarity()
@@ -54,7 +55,6 @@ class AttFeatureCosSimOptim(nn.Module):
         bg_img = np.array(Image.open(self.optim_params['background_image'])).astype(np.float32)
         self.feature_load = None
         while i < self.optim_params['iteration_num']:
-            #base_optimizer.zero_grad()
             optimizer.zero_grad()
             image, silhouette = self.render(input_kinematics)
             bg = T.ToTensor()(bg_img).to(device=self.device) / 255
@@ -80,28 +80,18 @@ class AttFeatureCosSimOptim(nn.Module):
                     data['optimized_camera_at'] = self.render.camera_at
                     data['optimized_camera_up'] = self.render.camera_up
             loss.backward()
-            #NaN_exist = False
-            #for param in optimization_params:
-            #    if torch.isnan(param.grad).sum() > 0:
-            #        param.grad[torch.isnan(param.grad)] = 0
-            #        print("NaN")
-            #    limit = self.optim_params['grad_limit']
-            #    param.grad[param.grad > limit] = limit
-            #    param.grad[param.grad < -limit] = -limit
-            #    mask = torch.zeros_like(param.grad)
-            #    mask[:,1] = 1
-            #    param.grad = param.grad * mask
+            if self.check_NaN:
+                NaN_exist = False
+                for param in optimization_params:
+                    if torch.isnan(param.grad).sum() > 0:
+                        param.grad[torch.isnan(param.grad)] = 0
+                        NaN_exist = True
+                if NaN_exist:
+                    continue
             i += 1
             optimizer.step()
-            #base_optimizer.step()
             lr_scheduler.step()
-        #image, silhouette = self.render(input_kinematics)
-        #if self.optim_params['optimize_kinematics']:
-        #    data['optimized_kinematics'] = input_kinematics
-        #if self.optim_params['optimize_cameras']:
-        #    data['optimized_camera_position'] = self.render.camera_position
-        #    data['optimized_camera_at'] = self.render.camera_at
-        #    data['optimized_camera_up'] = self.render.camera_up
+
         data['render_pred'] = best_pred
         data['final_loss'] = best_loss
         return data

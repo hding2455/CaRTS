@@ -11,7 +11,6 @@ from positional_encodings.torch_encodings import PositionalEncoding1D
 import os
 import time
 
-# Positional encoding (section 5.1)
 class Embedder:
     def __init__(self, **kwargs):
         self.kwargs = kwargs
@@ -78,8 +77,8 @@ class Kinematic_Corrector(nn.Module):
         result = self.predictor(x)
         return result
 
-class mCaRTSMLPOptim(nn.Module):
-    def __init__(self, optim_params, net, device):
+class TCCaRTSMLPOptim(nn.Module):
+    def __init__(self, optim_params, net, device, check_NaN=False):
         super().__init__()
         self.net = net
         self.device = device
@@ -89,7 +88,7 @@ class mCaRTSMLPOptim(nn.Module):
         self.positional_enc = PositionalEncoding1D(14)
         bg_img = np.array(Image.open(self.optim_params['background_image'])).astype(np.float32)
         self.bg = T.ToTensor()(bg_img).to(device=self.device) / 255
-        self.train_params = optim_params['train_params']
+        self.check_NaN = check_NaN
 
     def feature_sim_loss(self, net, load_image, render_image, attention_map):
         cos = CosineSimilarity()
@@ -143,18 +142,13 @@ class mCaRTSMLPOptim(nn.Module):
                 load_image = data['image'][:,-1]
             n,c,h,w = load_image.shape
             combine_image = combine_image.view(n,c,h,w)
-            #cv2.imwrite("original_image.png", cv2.cvtColor(load_image.permute(0,2,3,1).cpu().numpy().squeeze(),cv2.COLOR_RGB2BGR))
-            #cv2.imwrite("rendered_image.png", cv2.cvtColor(255*combine_image.permute(0,2,3,1).cpu().numpy().squeeze(),cv2.COLOR_RGB2BGR))
             loss = self.feature_sim_loss(self.net, load_image, combine_image*255, attention_map)
         best_loss = loss.item()
-        best_i = 0
         best_pred = silhouette[:,:,:, 3] 
         iteration_num = self.optim_params['iteration_num']
-        base_optimizer.zero_grad()
-       # iteration_num = math.ceil(iteration_num  / math.ceil((data['iteration']+1)/100))
         while i < iteration_num:
             optimizer.zero_grad() 
-            #base_optimizer.zero_grad()
+            base_optimizer.zero_grad()
             if shape_len == 3:
                 feedin_kinematics = kinematics[0].reshape(-1, 1)
             elif shape_len == 4:
@@ -162,10 +156,8 @@ class mCaRTSMLPOptim(nn.Module):
                 posistional_kinematics = original + self.positional_enc(original) 
                 feedin_kinematics = posistional_kinematics[0].permute(1,0).reshape(-1, kinematics.shape[1])
             
-
             kinematics_correction = self.corrector(feedin_kinematics)
             input_kinematics = kinematics_correction.view(initial_kinematics.shape[0], -1) + initial_kinematics
-            
 
             image, silhouette = self.render(input_kinematics)
             mask = silhouette[: ,:, :, :].permute(0,3,1,2)[:,3,:,:]
@@ -191,6 +183,14 @@ class mCaRTSMLPOptim(nn.Module):
                 #regularization 2: temporal smooth 
                 loss += 1 * ((input_kinematics - self.last_input_kinematics) ** 2).mean()
             loss.backward()
+            if self.check_NaN:
+                NaN_exist = False
+                for param in optimization_params:
+                    if torch.isnan(param.grad).sum() > 0:
+                        param.grad[torch.isnan(param.grad)] = 0
+                        NaN_exist = True
+                if NaN_exist:
+                    continue
             i += 1
             optimizer.step()
             lr_scheduler.step()
@@ -199,5 +199,4 @@ class mCaRTSMLPOptim(nn.Module):
         self.last_input_kinematics = input_kinematics.data
         data['render_pred'] = best_pred
         data['final_loss'] = best_loss
-        data['best_i'] = i
         return data

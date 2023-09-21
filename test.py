@@ -10,7 +10,7 @@ import time
 import argparse
 import os
 from torchvision.transforms import ColorJitter, GaussianBlur
-from CaRTS import build_carts 
+from CaRTS import build_model
 import random
 
 def mask_denoise(image):
@@ -80,7 +80,6 @@ def evaluate(model, dataloader, device, render_out = True, network_out = False, 
             render_pred = data['render_pred']
             render_pred = (render_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8)*255
             render_pred = torch.tensor(mask_denoise(render_pred)[None,:,:] / 255.0).to(device=device)
-            best_i = data['best_i']
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
@@ -96,7 +95,7 @@ def evaluate(model, dataloader, device, render_out = True, network_out = False, 
             dice_initial_bgs_render.append(dice_initial_bg_render)
             dice_tools_render.append(dice_tool_render)
             dice_bgs_render.append(dice_bg_render)
-            #print(dice_initial_tool_render, dice_tool_render)
+            print(dice_initial_tool_render, dice_tool_render)
         if network_out:
             dice_tool_network, dice_bg_network = dice_score(net_pred, data['gt'][:,0])
             dice_tools_network.append(dice_tool_network)
@@ -106,7 +105,6 @@ def evaluate(model, dataloader, device, render_out = True, network_out = False, 
         #    maes.append(np.abs((data["optimized_kinematics"].detach().cpu().numpy() - original_kinematics)[0,0,1]).mean())
     #if kinematics_noise is not None:
         #print("kinematics error:", kinematics_noise, "MAE after optimization:", np.mean(maes), np.max(maes), np.min(maes))
-    np.save("best_is.npy", best_is)
 
     elapsed = time.time() - start
     if render_out:
@@ -137,20 +135,6 @@ if __name__ == "__main__":
     cfg.validation_dataset['args']['subset_paths'] = [domain]
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
-    #for i in[3,10,30,50]:
-    for domain in ["regular","regular", "regular", "regular", "regular", "regular",
-                   "low_brightness", "low_brightness", "low_brightness", "low_brightness", "low_brightness",
-                   "blood","blood","blood","blood","blood",
-                   "alternative_bg", "alternative_bg","alternative_bg","alternative_bg","alternative_bg",
-                   "smoke", "smoke","smoke","smoke","smoke",]:    
-    #    print(i)
-        print(domain)
-        i = 5 
-        cfg.validation_dataset['args']['subset_paths'] = [domain]
-        validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
-        validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
-        cfg.carts['params']['optim']['params']['iteration_num'] = i
-        carts = build_carts(cfg.carts, device)
-        carts.net.load_parameters(args.model_path)
-    #carts.net.init_weights(args.model_path)
-        evaluate(carts, validation_dataloader, device, render_out = True, network_out = False, save_dir="./res/mcarts", domain=domain)
+    model = build_model(cfg.model, device)
+    model.load_parameters(args.model_path)
+    evaluate(model, validation_dataloader, device, render_out = True, network_out = False, save_dir=None, domain=domain)

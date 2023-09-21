@@ -333,10 +333,6 @@ class STM(nn.Module):
             self.decode_values = self.decode_values[:,:,:,-4:]
         return pred
 
-    def load_parameters(self, load_path):
-        state_dict = torch.load(load_path, map_location=self.device)['state_dict']
-        self.load_state_dict(torch.load(load_path, map_location=self.device)['state_dict'])
-
     def train_epochs(self, train_dataloader, validation_dataloader, load_path=None):
         train_params = self.train_params
         optimizer = train_params['optimizer']
@@ -345,6 +341,7 @@ class STM(nn.Module):
         save_interval = train_params['save_interval']
         save_path = train_params['save_path']
         log_interval = train_params['log_interval']
+        perturbation = train_params['perturbation']
         device = self.device
         if not os.path.exists(save_path):
             os.mkdir(save_path)
@@ -369,6 +366,8 @@ class STM(nn.Module):
             for i, (image, gt, kinematics) in enumerate(train_dataloader):
                 self.zero_grad()
                 data = {}
+                if perturbation is not None:
+                    image = perturbation(image/255) * 255
                 data['image'] = image.to(device=device)
                 data['gt'] = gt.to(device=device)
                 data['kinematics'] = kinematics.to(device=device)

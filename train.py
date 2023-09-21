@@ -6,10 +6,12 @@ import torch
 import time
 import argparse
 import os
-from CaRTS import build_carts
+from CaRTS import build_model
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", type=str)
+    parser.add_argument("--model_path", type=str, default=None)
     args = parser.parse_args()
     return args
 
@@ -26,9 +28,9 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
-    carts = build_carts(cfg.carts, device)
-    #if args.model_path is None:
-    loss_plot = carts.net.train_epochs(train_dataloader, validation_dataloader) 
-    #else:
-    #    carts.net.load_parameters(args.model_path)
-    #loss_plot = carts.optim.train_corrector(train_dataloader, validation_dataloader)
+    model = build_model(cfg.model, device)
+    if args.model_path is None:
+        loss_plot = model.train_epochs(train_dataloader, validation_dataloader) 
+    else:
+        model.load_parameters(args.model_path)
+        loss_plot = model.train_epochs(train_dataloader, validation_dataloader) 

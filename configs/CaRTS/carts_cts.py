@@ -1,11 +1,12 @@
 from torch.optim import  SGD, Adam
-from datasets import SmokeNoise
-from torch.nn import BCELoss, CrossEntropyLoss, ReLU
+from torch.nn import BCELoss
 from torch.optim.lr_scheduler import StepLR
 from torch.nn import BCELoss, SmoothL1Loss
 from torch.optim.lr_scheduler import StepLR
 import numpy as np
 import torch
+from datasets import SmokeNoise
+
 path_to_this_repo = "/home/hao/CausalMedSeg/"
 mesh_path = path_to_this_repo + "ADF/low_res/"
 link_meshes = [mesh_path+"base link.obj", mesh_path+"yaw link.obj", mesh_path+"pitch end link.obj",
@@ -20,14 +21,6 @@ baseT2 = [[ 0.5483, -0.8265, -0.1314,  1.0903],
         [-0.7020, -0.5704,  0.4681, -0.5071],
         [-0.4500, -0.1565, -0.8751,  0.0092],
         [ 0.0000,  0.0000,  0.0000,  1.0000]]
-#baseT1 = [[ 0.8258,  0.4259, -0.3523, -1.6137],
-#        [ 0.5095, -0.8261,  0.1959,  0.0019],
-#        [-0.2045, -0.3428, -0.9196,  0.4702],
-#        [ 0.0000,  0.0000,  0.0000,  1.0000]]
-#baseT2 = [[ 0.5445, -0.8148, -0.1687,  1.1866],
-#        [-0.6761, -0.5646,  0.4704, -0.4388],
-#        [-0.4720, -0.1431, -0.8683,  0.1136],
-#        [ 0.0000,  0.0000,  0.0000,  1.0000]]
 
 link_DH2Mesh = [
                     [[-1.0, 0.0, 0.0,  0.0],
@@ -70,10 +63,6 @@ tool_DH2Mesh = [
                       [ 0.0, 0.0, 0.0, 1.0]]
         ]
 
-def dice_loss(pred, gt):
-    loss = 1 - 2 * (pred * gt).sum() / (pred.sum() + gt.sum() + 1e-10)
-    return loss
-
 class cfg:
     train_dataset = dict(
         name = "CausalToolSeg",
@@ -90,44 +79,17 @@ class cfg:
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-11"],
-            subset_paths = ["regular"]))
-    carts = dict(
-        name = "mCaRTS",
+            subset_paths = ["alternative_bg"]))
+    model = dict(
+        name = "CaRTS",
         params = dict(
             vision = dict(
-                name = "HRNet",
+                name = "Unet",
                 params = dict(
-                    align_corners = True,
-                    target_size = (360, 480),
-                    model_param = dict(
-                        STAGE1 = dict(
-                            NUM_MODULES = 1,
-                            NUM_BRANCHES = 1,
-                            BLOCK = "BOTTLENECK",
-                            NUM_BLOCKS = [4],
-                            NUM_CHANNELS = [64],
-                            FUSE_METHOD = 'SUM'),
-                        STAGE2 = dict(
-                            NUM_MODULES = 1,
-                            NUM_BRANCHES = 2,
-                            BLOCK = "BASIC",
-                            NUM_BLOCKS = [4, 4],
-                            NUM_CHANNELS = [48, 96],
-                            FUSE_METHOD = 'SUM'),
-                        STAGE3 = dict(
-                            NUM_MODULES = 4,
-                            NUM_BRANCHES = 3,
-                            BLOCK = "BASIC",
-                            NUM_BLOCKS = [4,4,4],
-                            NUM_CHANNELS = [48, 96, 192],
-                            FUSE_METHOD = 'SUM'),
-                        STAGE4 = dict(
-                            NUM_MODULES = 3,
-                            NUM_BRANCHES = 4,
-                            BLOCK = "BASIC",
-                            NUM_BLOCKS = [4,4,4,4],
-                            NUM_CHANNELS = [48, 96, 192,384],
-                            FUSE_METHOD = 'SUM')),
+                    input_dim = 3,
+                    hidden_dims = [512, 256, 128, 64, 32],
+                    size = (15, 20),
+                    target_size = (360, 500),
                     criterion = BCELoss(),
                     train_params = dict(
                         perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
@@ -143,43 +105,24 @@ class cfg:
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
                         max_epoch_number=50,
-                        save_interval=5,
-                        save_path='./checkpoints/mcarts_cts_hrnet_smoke/',
+                        save_interval=10,
+                        save_path='./checkpoints/carts_unet_cts/',
                         log_interval=50))),
             optim = dict(
-                name = "mCaRTSMLPOptim",
+                name = "AttFeatureCosSimOptim",
                 params = dict(
-                    train_params = dict(
-                        lr_scheduler = dict(
-                            lr_scheduler_class = StepLR,
-                            args = dict(
-                                step_size=20,
-                                gamma=0.1)),
-                        optimizer = dict(
-                            optim_class = Adam,
-                            args = dict(
-                                lr = 1e-4)),
-                        max_epoch_number=10,
-                        save_interval=10,
-                        save_path='./checkpoints/mcarts_corrector_cts/',
-                        log_interval=50,
-                        criterion=dice_loss),
-                    corrector = dict(
-                        dims = [5, 32, 128, 128, 128, 128, 32],
-                        activation = ReLU
-                        ),
                     optimizer = dict(
                         optim_class = Adam,
                         args = dict(
-                            lr = 1e-4)),
+                            lr = 1e-3)),
                     lr_scheduler = dict(
                         lr_scheduler_class = StepLR,
                         args = dict(
-                        step_size=20,
+                        step_size=5,
                         gamma=0.9)),
                     background_image = '/data/hao/processed_data/mean_background_l.png',
                     grad_limit = 1.0,
-                    iteration_num = 3,
+                    iteration_num = 30,
                     optimize_cameras=False,
                     optimize_kinematics=True,
                     ref_threshold=0.5,

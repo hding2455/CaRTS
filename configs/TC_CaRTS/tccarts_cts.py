@@ -20,14 +20,6 @@ baseT2 = [[ 0.5483, -0.8265, -0.1314,  1.0903],
         [-0.7020, -0.5704,  0.4681, -0.5071],
         [-0.4500, -0.1565, -0.8751,  0.0092],
         [ 0.0000,  0.0000,  0.0000,  1.0000]]
-#baseT1 = [[ 0.8258,  0.4259, -0.3523, -1.6137],
-#        [ 0.5095, -0.8261,  0.1959,  0.0019],
-#        [-0.2045, -0.3428, -0.9196,  0.4702],
-#        [ 0.0000,  0.0000,  0.0000,  1.0000]]
-#baseT2 = [[ 0.5445, -0.8148, -0.1687,  1.1866],
-#        [-0.6761, -0.5646,  0.4704, -0.4388],
-#        [-0.4720, -0.1431, -0.8683,  0.1136],
-#        [ 0.0000,  0.0000,  0.0000,  1.0000]]
 
 link_DH2Mesh = [
                     [[-1.0, 0.0, 0.0,  0.0],
@@ -93,8 +85,8 @@ class cfg:
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-12"],
             subset_paths = ["regular"]))
-    carts = dict(
-        name = "mCaRTS",
+    model = dict(
+        name = "CaRTS",
         params = dict(
             vision = dict(
                 name = "Unet",
@@ -105,6 +97,7 @@ class cfg:
                     target_size = (360, 500),
                     criterion = BCELoss(),
                     train_params = dict(
+                        perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
                         lr_scheduler = dict(
                             lr_scheduler_class = StepLR,
                             args = dict(
@@ -118,27 +111,11 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=20,
                         save_interval=5,
-                        save_path='./checkpoints/mcarts_unet_cts/',
+                        save_path='./checkpoints/tccarts_unet_cts/',
                         log_interval=50))),
             optim = dict(
-                name = "mCaRTSMLPOptim",
+                name = "TCCaRTSMLPOptim",
                 params = dict(
-                    train_params = dict(
-                        #perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
-                        lr_scheduler = dict(
-                            lr_scheduler_class = StepLR,
-                            args = dict(
-                                step_size=20,
-                                gamma=0.1)),
-                        optimizer = dict(
-                            optim_class = Adam,
-                            args = dict(
-                                lr = 1e-4)),
-                        max_epoch_number=10,
-                        save_interval=10,
-                        save_path='./checkpoints/mcarts_corrector_cts/',
-                        log_interval=50,
-                        criterion=dice_loss),
                     corrector = dict(
                         dims = [input_len, 32, 64, 128, 64, 32],
                         activation = ReLU
@@ -155,7 +132,7 @@ class cfg:
                         gamma=0.9)),
                     background_image = '/data/hao/processed_data/mean_background_l.png',
                     grad_limit = 1.0,
-                    iteration_num = 10,
+                    iteration_num = 5,
                     optimize_cameras=False,
                     optimize_kinematics=True,
                     ref_threshold=0.5,
