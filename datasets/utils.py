@@ -157,8 +157,9 @@ def smoke_noise(ds_steps=9, max_rnd=1.0):
     return (Final_height_map - Final_height_map.min()) / (Final_height_map.max() - Final_height_map.min())
 
 class SmokeNoise(torch.nn.Module):
-    def __init__(self, size, ds_steps=9, max_rnd=1.0, smoke_aug=0.5):
+    def __init__(self, size, ds_steps=9, max_rnd=1.0, smoke_aug=0.5, p = 0.2):
         super().__init__()
+        self.p = p
         self.ds_steps = ds_steps
         self.max_rnd = max_rnd
         self.resize = T.Resize(size)
@@ -170,6 +171,8 @@ class SmokeNoise(torch.nn.Module):
         return T.ToTensor()(Final_height_map - Final_height_map.min()) / (Final_height_map.max() - Final_height_map.min())
 
     def forward(self, img): 
+        if random.random() > self.p:
+            return img
         noise = self.smoke_noise()
         resized_noise = self.resize(noise) * self.smoke_aug
         result_img = torch.clamp(img*(1-resized_noise) + resized_noise, min=0.0, max=1.0)

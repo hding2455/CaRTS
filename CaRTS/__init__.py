@@ -1,6 +1,12 @@
-from .carts_base import CaRTSBase
+from .carts import CaRTS
+from .vision import Unet, HRNet, STM
 
-carts_dict = {"CaRTSBase":CaRTSBase}
+model_dict = {
+                "CaRTS": CaRTS,
+                "Unet": Unet,
+                "HRNet": HRNet,
+                "STM": STM
+            }
 
-def build_carts(carts, device):
-    return carts_dict[carts['name']](carts['params'], device)
+def build_model(model, device):
+    return model_dict[model['name']](model['params'], device)

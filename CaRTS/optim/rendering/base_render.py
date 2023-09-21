@@ -43,6 +43,7 @@ class BaseRender(nn.Module):
         self.camera_position = nn.Parameter(torch.tensor(camera_params['position'])).to(device = device)
         self.camera_at = nn.Parameter(torch.tensor(camera_params['at'])).to(device = device)
         self.camera_up = nn.Parameter(torch.tensor(camera_params['up'])).to(device = device)
+
         #init robots
         self.robots = []
         for robot_params in robot_params_list:
@@ -68,9 +69,9 @@ class BaseRender(nn.Module):
         mesh = self.get_mesh(kinematics)
         R = look_at_rotation(self.camera_position[None, :],at=self.camera_at[None, :],up=self.camera_up[None, :],device=self.device)
         T = -torch.bmm(R.transpose(2, 1), self.camera_position[None, :, None])[:, :, 0]
-        silhouette = self.silhouette_renderer(meshes_world=mesh, R=R, T=T)
+        #silhouette = self.silhouette_renderer(meshes_world=mesh, R=R, T=T)
         image = self.phong_renderer(meshes_world=mesh, R=R, T=T)
-        return image, silhouette
+        return image, image
     
     def get_mesh(self, kinematics):
         verts = []

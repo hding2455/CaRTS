@@ -10,7 +10,7 @@ import time
 import argparse
 import os
 from torchvision.transforms import ColorJitter, GaussianBlur
-from CaRTS import build_carts 
+from CaRTS import build_model
 import random
 
 def mask_denoise(image):
@@ -34,7 +34,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", type=str)
     parser.add_argument("model_path", type=str)
-    #parser.add_argument("test_domain", type=str)
+    parser.add_argument("test_domain", type=str)
     args = parser.parse_args()
     return args
 
@@ -46,16 +46,17 @@ def dice_score(pred, gt):
     return dice_tool.item(), dice_bg.item()
 
 
-def evaluate(model, dataloader, device, network_out = False, perturbation=None, kinematics_noise=None, save_dir=None):
+def evaluate(model, dataloader, device, render_out = True, network_out = False, perturbation=None, kinematics_noise=None, save_dir=None, domain="regular"):
     start = time.time()
-    dice_initial_tools = []
-    dice_initial_bgs = []
-    dice_tools_improvement = []
-    dice_tools = []
-    dice_bgs = []
-    dice_scores = []
-    maes_initial = []
-    maes = []
+    if render_out:
+        dice_initial_tools_render = []
+        dice_initial_bgs_render = []
+        dice_tools_render = []
+        dice_bgs_render = []
+        best_is = []
+    if network_out:
+        dice_tools_network = []
+        dice_bgs_network = []
     for i, (image, gt, kinematics) in enumerate(dataloader):
         data = dict()
         if perturbation is not None:
@@ -64,46 +65,62 @@ def evaluate(model, dataloader, device, network_out = False, perturbation=None, 
             original_kinematics = kinematics.numpy()
             mask = torch.zeros_like(kinematics)
             mask[:, :, 0] = 1
-            #kinematics_noise = random.randint(0,4) / 180 * 3.14159
-            kinematics = kinematics + kinematics_noise * mask#torch.sign((torch.rand_like(kinematics) - 0.5)) * mask
+            kinematics = kinematics + kinematics_noise * mask
         data['image'] = image.to(device=device)
         data['gt'] = gt.to(device=device)
         data['kinematics'] = kinematics.to(device=device)
-        data = model(data)
+        data['iteration'] = i
+        data = model(data, render_out=render_out, network_out=network_out)
         if network_out:
-            pred = data['net_pred']
-        else:
-            pred = data['render_pred']
-        pred = (pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8)*255
-        pred = torch.tensor(mask_denoise(pred)[None,:,:] / 255.0).to(device=device)
+            net_pred = data['net_pred']
+        if render_out:
+            pure_render = data['pure_render']
+            pure_render = (pure_render.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8)*255
+            pure_render = torch.tensor(mask_denoise(pure_render)[None,:,:] / 255.0).to(device=device)
+            render_pred = data['render_pred']
+            render_pred = (render_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8)*255
+            render_pred = torch.tensor(mask_denoise(render_pred)[None,:,:] / 255.0).to(device=device)
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
-            res = pred[0]
-            save_image(res, os.path.join(save_dir, str(i)+'.png'))
-        dice_tool, dice_bg = dice_score(pred, data['gt'][:,0])
-        dice_initial_tool, dice_initial_bg =  dice_score(data['pure_render'], data['gt'][:,0])
-        dice_initial_tools.append(dice_initial_tool)
-        print(i, dice_initial_tool, dice_tool)
-        dice_tools.append(dice_tool)
-        dice_tools_improvement.append(dice_tool - dice_initial_tool)
-        dice_bgs.append(dice_bg)
-        dice_scores.append((dice_tool+dice_bg)/2)
-        elapsed = time.time() - start
-        if kinematics_noise is not None:
-            maes_initial.append(kinematics_noise)
-            maes.append(np.abs((data["optimized_kinematics"].detach().cpu().numpy() - original_kinematics)[0,0,1]).mean())
-    if kinematics_noise is not None:
-        print("kinematics error:", kinematics_noise, "MAE after optimization:", np.mean(maes), np.max(maes), np.min(maes))
-    print("iteration per Sec: %f \n mean: dice_bg: %f initial_dice_tool: %f dice_tool: %f dice_improvement: %f dice_score%f" %
-                    ((i+1) / elapsed, np.mean([dice_bgs]), np.mean([dice_initial_tools]), np.mean([dice_tools]), np.mean([dice_tools_improvement]),np.mean([dice_scores])))
-    print("min: dice_bg: %f initial_dice_tool: %f dice_tool: %f dice_improvement: %f dice_score%f" %
-                    (np.min([dice_bgs]),np.min([dice_initial_tools]), np.min([dice_tools]), np.min([dice_tools_improvement]),np.min([dice_scores])))
-    print("max: dice_bg: %f initial_dice_tool: %f dice_tool: %f dice_improvement: %f dice_score%f" %
-                    (np.max([dice_bgs]),np.max([dice_initial_tools]), np.max([dice_tools]), np.max([dice_tools_improvement]),np.max([dice_scores])))
-    print("std: dice_bg: %f initial_dice_tool: %f dice_tool: %f dice_improvement: %f dice_score%f" %
-                    (np.std([dice_bgs]),np.std([dice_initial_tools]), np.std([dice_tools]), np.std([dice_tools_improvement]),np.std([dice_scores])))
-    return dice_initial_tools, dice_tools, dice_tools_improvement, maes, maes_initial
+            if network_out:
+                save_image(net_pred[0], os.path.join(save_dir, 'net_pred'+str(i)+domain+'.png'))
+            if render_out:
+                save_image(render_pred[0], os.path.join(save_dir, 'render_pred'+str(i)+domain+'.png'))
+            save_image(gt[0,0,0], os.path.join(save_dir, 'gt'+str(i)+domain+'.png'))
+        if render_out:
+            dice_tool_render, dice_bg_render = dice_score(render_pred, data['gt'][:,-1])
+            dice_initial_tool_render, dice_initial_bg_render =  dice_score(pure_render, data['gt'][:,-1])
+            dice_initial_tools_render.append(dice_initial_tool_render)
+            dice_initial_bgs_render.append(dice_initial_bg_render)
+            dice_tools_render.append(dice_tool_render)
+            dice_bgs_render.append(dice_bg_render)
+            print(dice_initial_tool_render, dice_tool_render)
+        if network_out:
+            dice_tool_network, dice_bg_network = dice_score(net_pred, data['gt'][:,0])
+            dice_tools_network.append(dice_tool_network)
+            dice_bgs_network.append(dice_bg_network)
+        #if kinematics_noise is not None:
+        #    maes_initial.append(kinematics_noise)
+        #    maes.append(np.abs((data["optimized_kinematics"].detach().cpu().numpy() - original_kinematics)[0,0,1]).mean())
+    #if kinematics_noise is not None:
+        #print("kinematics error:", kinematics_noise, "MAE after optimization:", np.mean(maes), np.max(maes), np.min(maes))
+
+    elapsed = time.time() - start
+    if render_out:
+        print("rendering results:")
+        print("iteration per Sec: %f \n mean: dice_initial_bg: %f dice_bg: %f initial_dice_tool: %f dice_tool: %f " %
+            ((i+1) / elapsed, np.mean([dice_initial_bgs_render]), np.mean([dice_bgs_render]), np.mean([dice_initial_tools_render]), np.mean([dice_tools_render])))
+        print("std: dice_initial_bg: %f dice_bg: %f initial_dice_tool: %f dice_tool: %f " %
+            (np.mean([dice_initial_bgs_render]), np.std([dice_bgs_render]),np.std([dice_initial_tools_render]), np.std([dice_tools_render])))
+    if network_out:
+        print("network results:")
+        print("iteration per Sec: %f \n mean: dice_bg: %f dice_tool: %f " %
+            ((i+1) / elapsed, np.mean([dice_bgs_network]), np.mean([dice_tools_network])))
+        print("std: dice_bg: %f dice_tool: %f " %
+             (np.std([dice_bgs_network]), np.std([dice_tools_network])))
+
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -114,8 +131,10 @@ if __name__ == "__main__":
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
+    domain = args.test_domain
+    cfg.validation_dataset['args']['subset_paths'] = [domain]
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
-    carts = build_carts(cfg.carts, device)
-    carts.net.load_parameters(args.model_path)
-    dice_initial_tools, dice_tools, dice_tools_improvement, maes, maes_initial = evaluate(carts, validation_dataloader, device)
+    model = build_model(cfg.model, device)
+    model.load_parameters(args.model_path)
+    evaluate(model, validation_dataloader, device, render_out = True, network_out = False, save_dir=None, domain=domain)
