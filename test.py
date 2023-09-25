@@ -13,23 +13,6 @@ from torchvision.transforms import ColorJitter, GaussianBlur
 from CaRTS import build_model
 import random
 
-def mask_denoise(image):
-    _, CCs = cv2.connectedComponents(image, connectivity=4)
-    labels = np.unique(CCs)
-    for i in labels:
-        if i == 0:
-            continue
-        if (CCs == i).sum() < 3000:
-            image[CCs == i] = 0
-    _, CCs = cv2.connectedComponents(255 - image, connectivity=4)
-    labels = np.unique(CCs)
-    for i in labels:
-        if i == 0:
-            continue
-        if (CCs == i).sum() < 3000:
-            image[CCs == i] = 255
-    return image
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", type=str)
@@ -46,17 +29,10 @@ def dice_score(pred, gt):
     return dice_tool.item(), dice_bg.item()
 
 
-def evaluate(model, dataloader, device, render_out = True, network_out = False, perturbation=None, kinematics_noise=None, save_dir=None, domain="regular"):
+def evaluate(model, dataloader, device, perturbation=None, kinematics_noise=None, save_dir=None, domain="regular"):
     start = time.time()
-    if render_out:
-        dice_initial_tools_render = []
-        dice_initial_bgs_render = []
-        dice_tools_render = []
-        dice_bgs_render = []
-        best_is = []
-    if network_out:
-        dice_tools_network = []
-        dice_bgs_network = []
+    dice_tools = []
+    dice_bgs = []
     for i, (image, gt, kinematics) in enumerate(dataloader):
         data = dict()
         if perturbation is not None:
@@ -70,55 +46,20 @@ def evaluate(model, dataloader, device, render_out = True, network_out = False, 
         data['gt'] = gt.to(device=device)
         data['kinematics'] = kinematics.to(device=device)
         data['iteration'] = i
-        data = model(data, render_out=render_out, network_out=network_out)
-        if network_out:
-            net_pred = data['net_pred']
-        if render_out:
-            pure_render = data['pure_render']
-            pure_render = (pure_render.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8)*255
-            pure_render = torch.tensor(mask_denoise(pure_render)[None,:,:] / 255.0).to(device=device)
-            render_pred = data['render_pred']
-            render_pred = (render_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8)*255
-            render_pred = torch.tensor(mask_denoise(render_pred)[None,:,:] / 255.0).to(device=device)
+        pred = model(data)['pred']
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
-            if network_out:
-                save_image(net_pred[0], os.path.join(save_dir, 'net_pred'+str(i)+domain+'.png'))
-            if render_out:
-                save_image(render_pred[0], os.path.join(save_dir, 'render_pred'+str(i)+domain+'.png'))
-            save_image(gt[0,0,0], os.path.join(save_dir, 'gt'+str(i)+domain+'.png'))
-        if render_out:
-            dice_tool_render, dice_bg_render = dice_score(render_pred, data['gt'][:,-1])
-            dice_initial_tool_render, dice_initial_bg_render =  dice_score(pure_render, data['gt'][:,-1])
-            dice_initial_tools_render.append(dice_initial_tool_render)
-            dice_initial_bgs_render.append(dice_initial_bg_render)
-            dice_tools_render.append(dice_tool_render)
-            dice_bgs_render.append(dice_bg_render)
-            print(dice_initial_tool_render, dice_tool_render)
-        if network_out:
-            dice_tool_network, dice_bg_network = dice_score(net_pred, data['gt'][:,0])
-            dice_tools_network.append(dice_tool_network)
-            dice_bgs_network.append(dice_bg_network)
-        #if kinematics_noise is not None:
-        #    maes_initial.append(kinematics_noise)
-        #    maes.append(np.abs((data["optimized_kinematics"].detach().cpu().numpy() - original_kinematics)[0,0,1]).mean())
-    #if kinematics_noise is not None:
-        #print("kinematics error:", kinematics_noise, "MAE after optimization:", np.mean(maes), np.max(maes), np.min(maes))
+            save_image(net_pred[0], os.path.join(save_dir, 'pred'+str(i)+domain+'.png'))
+        dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
+        dice_tools.append(dice_tool)
+        dice_bgs.append(dice_bg)
 
     elapsed = time.time() - start
-    if render_out:
-        print("rendering results:")
-        print("iteration per Sec: %f \n mean: dice_initial_bg: %f dice_bg: %f initial_dice_tool: %f dice_tool: %f " %
-            ((i+1) / elapsed, np.mean([dice_initial_bgs_render]), np.mean([dice_bgs_render]), np.mean([dice_initial_tools_render]), np.mean([dice_tools_render])))
-        print("std: dice_initial_bg: %f dice_bg: %f initial_dice_tool: %f dice_tool: %f " %
-            (np.mean([dice_initial_bgs_render]), np.std([dice_bgs_render]),np.std([dice_initial_tools_render]), np.std([dice_tools_render])))
-    if network_out:
-        print("network results:")
-        print("iteration per Sec: %f \n mean: dice_bg: %f dice_tool: %f " %
-            ((i+1) / elapsed, np.mean([dice_bgs_network]), np.mean([dice_tools_network])))
-        print("std: dice_bg: %f dice_tool: %f " %
-             (np.std([dice_bgs_network]), np.std([dice_tools_network])))
+    print("iteration per Sec: %f \n mean: dice_bg: %f dice_tool: %f " %
+        ((i+1) / elapsed, np.mean([dice_bgs]), np.mean([dice_tools])))
+    print("std: dice_bg: %f dice_tool: %f " %
+            (np.std([dice_bgs]), np.std([dice_tools])))
 
 
 
@@ -137,4 +78,4 @@ if __name__ == "__main__":
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)
-    evaluate(model, validation_dataloader, device, render_out = True, network_out = False, save_dir=None, domain=domain)
+    evaluate(model, validation_dataloader, device, save_dir=None, domain=domain)

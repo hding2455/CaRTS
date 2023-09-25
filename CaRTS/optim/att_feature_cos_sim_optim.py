@@ -6,6 +6,7 @@ from torch.nn import CosineSimilarity
 import torch.nn as nn
 import torch
 import numpy as np
+from .utils import mask_denoise
 
 class AttFeatureCosSimOptim(nn.Module):
     def __init__(self, optim_params, net, device, check_NaN=False):
@@ -16,12 +17,12 @@ class AttFeatureCosSimOptim(nn.Module):
         self.optim_params = optim_params
         self.check_NaN = check_NaN
     
-    def feature_sim_loss(self, net, load_image, render_image, attention_map):
+    def feature_sim_loss(self, load_image, render_image, attention_map):
         cos = CosineSimilarity()
         if self.feature_load is None:
             with torch.no_grad():
-                self.feature_load = net.get_feature_map(dict(image = load_image))
-        feature_render = net.get_feature_map(dict(image = render_image))
+                self.feature_load = self.net.get_feature_map(dict(image = load_image))
+        feature_render = self.net.get_feature_map(dict(image = render_image))
         return ((1 - cos(self.feature_load, feature_render)) * attention_map).mean()
 
     def dilation_attention_map(self, silhouette, kernel_size=5, iteration=1):
@@ -66,7 +67,7 @@ class AttFeatureCosSimOptim(nn.Module):
             load_image = data['image']
             n,c,h,w = load_image.shape
             combine_image = combine_image.view(n,c,h,w)
-            loss = self.feature_sim_loss(self.net, load_image, combine_image*255, attention_map)
+            loss = self.feature_sim_loss(load_image, combine_image*255, attention_map)
             if i == 0:
                 data['pure_render'] = silhouette[:,:,:, 3]
                 data['init_loss'] = loss.item()
@@ -91,7 +92,8 @@ class AttFeatureCosSimOptim(nn.Module):
             i += 1
             optimizer.step()
             lr_scheduler.step()
-
-        data['render_pred'] = best_pred
+        best_pred = (best_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8) * 255
+        best_pred = torch.tensor(mask_denoise(best_pred)[None,:,:] / 255.0).to(device = self.device)
+        data['pred'] = best_pred
         data['final_loss'] = best_loss
         return data

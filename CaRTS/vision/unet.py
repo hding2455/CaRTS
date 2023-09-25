@@ -125,4 +125,5 @@ class Unet(VisionBase):
             loss = self.criterion(result.sigmoid(), gt)
             return result, loss
         else:
-            return result.sigmoid()
+            x['pred'] = result.sigmoid()
+            return x

@@ -8,13 +8,9 @@ class CaRTS(nn.Module):
         self.net = build_vision_module(params['vision'], device=device)
         self.optim = build_optim_module(params['optim'], net=self.net, device=device)
     
-    def forward(self, data, render_out=True, network_out=False):
+    def forward(self, data):
         self.net.eval()
-        if network_out:
-            data['net_pred'] = self.net(data)
-        if render_out:
-            data['net'] = self.net
-            data = self.optim(data)
+        data = self.optim(data)
         return data
     
     def train_epochs(self, train_dataloader, validation_dataloader, load_path=None):

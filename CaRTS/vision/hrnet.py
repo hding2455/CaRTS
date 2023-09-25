@@ -439,7 +439,8 @@ class HRNet(VisionBase):
             loss = self.criterion(result.sigmoid(), gt)
             return result, loss
         else:
-            return result.sigmoid()
+            data['pred'] = (result.sigmoid() > 0.5)
+            return data
 
     def get_feature_map(self, data):
         x = data['image']

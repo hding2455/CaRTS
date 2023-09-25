@@ -10,6 +10,7 @@ import numpy as np
 from positional_encodings.torch_encodings import PositionalEncoding1D
 import os
 import time
+from .utils import mask_denoise
 
 class Embedder:
     def __init__(self, **kwargs):
@@ -90,12 +91,12 @@ class TCCaRTSMLPOptim(nn.Module):
         self.bg = T.ToTensor()(bg_img).to(device=self.device) / 255
         self.check_NaN = check_NaN
 
-    def feature_sim_loss(self, net, load_image, render_image, attention_map):
+    def feature_sim_loss(self, load_image, render_image, attention_map):
         cos = CosineSimilarity()
         if self.feature_load is None:
             with torch.no_grad():
-                self.feature_load = net.get_feature_map(dict(image = load_image))
-        feature_render = net.get_feature_map(dict(image = render_image))
+                self.feature_load = self.net.get_feature_map(dict(image = load_image))
+        feature_render = self.net.get_feature_map(dict(image = render_image))
         return ((1 - cos(self.feature_load, feature_render)) * attention_map).mean()
 
     def dilation_attention_map(self, silhouette, kernel_size=5, iteration=1):
@@ -142,7 +143,7 @@ class TCCaRTSMLPOptim(nn.Module):
                 load_image = data['image'][:,-1]
             n,c,h,w = load_image.shape
             combine_image = combine_image.view(n,c,h,w)
-            loss = self.feature_sim_loss(self.net, load_image, combine_image*255, attention_map)
+            loss = self.feature_sim_loss(load_image, combine_image*255, attention_map)
         best_loss = loss.item()
         best_pred = silhouette[:,:,:, 3] 
         iteration_num = self.optim_params['iteration_num']
@@ -171,7 +172,7 @@ class TCCaRTSMLPOptim(nn.Module):
                 load_image = data['image'][:,-1]
             n,c,h,w = load_image.shape
             combine_image = combine_image.view(n,c,h,w)
-            loss = self.feature_sim_loss(self.net, load_image, combine_image*255, attention_map)
+            loss = self.feature_sim_loss(load_image, combine_image*255, attention_map)
             if loss.item() < best_loss:
                 best_i = i
                 best_pred = silhouette[:,:,:, 3]
@@ -197,6 +198,8 @@ class TCCaRTSMLPOptim(nn.Module):
         #hand-eye optimization    
         base_optimizer.step()
         self.last_input_kinematics = input_kinematics.data
-        data['render_pred'] = best_pred
+        best_pred = (best_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8) * 255
+        best_pred = torch.tensor(mask_denoise(best_pred)[None,:,:] / 255.0).to(device = self.device)
+        data['pred'] = best_pred
         data['final_loss'] = best_loss
         return data
