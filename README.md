@@ -17,6 +17,10 @@ This repo hosts the code for implementing the CaRTS algorithms for Robot Tool se
 
 ![CaRTS](img/CaRTS.jpeg)
 
+![tc_causal_model](img/tc_carts_causal.jpg)
+
+![CaRTS](img/tc_carts.jpg)
+
 ## Highlights
 - **Complementary Causal Model for Robot Tool Segmentation**  
 - **Architecture CaRTS, based on the causal model** 
