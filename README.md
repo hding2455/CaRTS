@@ -1,10 +1,15 @@
 # CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data
 This repo hosts the code for implementing the CaRTS algorithms for Robot Tool segmentation.
 
-> [**CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data**](https://arxiv.org/abs/2203.09475),            
+> [**CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data**](https://link.springer.com/chapter/10.1007/978-3-031-16449-1_37),            
 > Hao Ding, Jintan Zhang, Peter Kazanzides, Jie Ying Wu, Mathias Unberath 
-> In: Proc. MICCAI, 2022  
-> *arXiv preprint ([arXiv 2203.09475](https://arxiv.org/abs/2203.09475))*  
+> Proc. MICCAI, 2022  
+> *arXiv preprint ([arXiv 2203.09475](https://arxiv.org/abs/2203.09475))*
+>
+> [**Rethinking Causality-driven Robot Tool Segmentation with Temporal Constraints**](https://link.springer.com/article/10.1007/s11548-023-02872-8),
+> Hao Ding, Jie Ying Wu, Zhaoshuo Li, Mathias Unberath
+> Int J CARS 18, 1009–1016 (2023)
+> *arXiv preprint ([arXiv 2203.09475](https://arxiv.org/abs/2212.00072))*
 
 ![eye_candy](img/eye_candy.jpeg)
 
@@ -25,11 +30,11 @@ This repo hosts the code for implementing the CaRTS algorithms for Robot Tool se
 
 ### Our CUDA VERSION is:
     
-    Cuda compilation tools, release 11.6, V11.6.124
+    Cuda compilation tools, release 12.2, V12.2.128
 
 ### Our GPU DRIVER VERSION is:
 
-    510.60.02
+    535.104.05
 
 
 ## Usage
@@ -42,15 +47,15 @@ python train_nn.py <config_name>
 
 ### for example:
 
-python train_nn.py CaRTSACSCTS
+python train.py CaRTS_CTS
 
 ### To run inference, give the name of the config and the path to the checkpoint file for networks to load:
 
-python test.py <config_name> <path_to_checkpoint>
+python test.py <config_name> <path_to_checkpoint> <test_domain>
 
 ### for example:
 
-python test.py CaRTSACSCTS ../CaRTS/checkpoints/carts_base_cts/model_49.pth
+python test.py CaRTS_CTS ./checkpoints/carts/model_49.pth regular
 
 ## Dataset preparation:
 
@@ -70,6 +75,14 @@ Please consider citing our papers in your publications if this repo helps you.
   pages={387--398},
   year={2022},
   organization={Springer}
+}
+
+@article{Ding2022RethinkingCR,
+  title={Rethinking causality-driven robot tool segmentation with temporal constraints},
+  author={Hao Ding and Jie Ying Wu and Zhaoshuo Li and M. Unberath},
+  journal={International Journal of Computer Assisted Radiology and Surgery},
+  year={2022},
+  pages={1009 - 1016},
 }
 ```
 
