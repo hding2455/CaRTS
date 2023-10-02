@@ -25,7 +25,7 @@ class cfg:
             video_paths = ["set-12"],
             subset_paths = ["regular"]))
     model = dict(
-                name = "SETR",
+                name = "SETR_MLA",
                 params = dict(
                     img_dim = (360, 480),
                     patch_dim = 15,
@@ -39,6 +39,7 @@ class cfg:
                     attn_dropout_rate = 0.1,
                     conv_patch_representation = False,
                     positional_encoding_type = "learned",
+                    aux_layers = [3, 6, 9, 12],
                     criterion = BCELoss(),
                     train_params = dict(
                         perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
@@ -48,12 +49,11 @@ class cfg:
                                 step_size=5,
                                 gamma=0.1)),
                         optimizer = dict(
-                            optim_class = SGD,
+                            optim_class = Adam,
                             args = dict(
-                                lr = 0.01,
-                                momentum = 0.9,
+                                lr = 1e-5,
                                 weight_decay = 10e-5)),
-                        max_epoch_number=20,
+                        max_epoch_number=30,
                         save_interval=5,
-                        save_path='./checkpoints/setr_cts/',
+                        save_path='./checkpoints/setr_mla_cts/',
                         log_interval=50)))
