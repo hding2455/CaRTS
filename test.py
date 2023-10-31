@@ -33,6 +33,7 @@ def evaluate(model, dataloader, device, perturbation=None, kinematics_noise=None
     start = time.time()
     dice_tools = []
     dice_bgs = []
+    model.eval()
     for i, (image, gt, kinematics) in enumerate(dataloader):
         data = dict()
         if perturbation is not None:
