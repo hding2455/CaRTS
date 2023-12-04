@@ -11,6 +11,7 @@ import random
 import cv2
 import scipy.io
 from PIL import Image
+from .augmentation import augmentation_dict
 
 def readKinematics(folder):
     kinematics = []
@@ -45,7 +46,7 @@ class CausalToolSeg(data.Dataset):
                     self.gt_paths.append(osp.join(osp.join(gt_path, 'ground_truth_l'), str(i) + ".png"))
                 self.kinematics.append(kinemactis)
 
-        self.image_transforms = image_transforms
+        self.image_transforms = augmentation_dict[image_transforms] if image_transforms != None else None
         self.gt_transforms = gt_transforms
         self.kinematics_transforms = kinematics_transforms
         self.series_length = series_length

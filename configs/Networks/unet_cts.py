@@ -12,6 +12,7 @@ class cfg:
         name = "CausalToolSeg",
         args = dict(
             series_length = 1,
+            image_transforms = "AutoAugment",
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-1", "set-2", "set-3", "set-5", "set-6", "set-9", "set-10", 
                           'synthetics-set-1',  'synthetics-set-2' , 'synthetics-set-3' , 'synthetics-set-5',  
