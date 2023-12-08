@@ -1,11 +1,12 @@
 from .carts import CaRTS
-from .vision import Unet, HRNet, STM
+from .vision import Unet, HRNet, STM, Segformer
 
 model_dict = {
                 "CaRTS": CaRTS,
                 "Unet": Unet,
                 "HRNet": HRNet,
-                "STM": STM
+                "STM": STM,
+                "Segformer": Segformer
             }
 
 def build_model(model, device):
