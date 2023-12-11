@@ -22,8 +22,7 @@ class cfg:
             subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], 
             domains = ['regular'],
             image_transforms = transform,
-            gt_transforms = transform,
-            ))
+            gt_transforms = transform,))
     validation_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
@@ -31,9 +30,9 @@ class cfg:
             split = 'val', 
             set_indices = [1], 
             subset_indices = [[0,1,2]], 
-            domains = ['regular']),
+            domains = ['regular'],
             image_transforms = transform,
-            gt_transforms = transform)
+            gt_transforms = transform,))
     model = dict(
                 name = "Unet",
                 params = dict(
