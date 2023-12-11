@@ -27,7 +27,7 @@ def readKinematics(folder):
     return output_kinematics
 
 class CausalToolSeg(data.Dataset):
-    def __init__(self, folder_path, video_paths, subset_paths, series_length=1, image_transforms=None, gt_transforms=None, kinematics_transforms=None):
+    def __init__(self, folder_path, video_paths, domains, series_length=1, image_transforms=None, gt_transforms=None, kinematics_transforms=None):
         self.folder_path = folder_path
         self.image_paths = []
         self.gt_paths = []
@@ -38,7 +38,7 @@ class CausalToolSeg(data.Dataset):
             gt_path = osp.join(video_path, 'green_screen')
             kinemactis = readKinematics(gt_path)
             image_numbers = len(kinemactis)
-            for s in subset_paths:
+            for s in domains:
                 image_folder = osp.join(video_path, s)
                 for i in range(image_numbers):
                     self.image_paths.append(osp.join(osp.join(image_folder, "images_l") , str(i) + ".png"))
