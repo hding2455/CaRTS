@@ -74,7 +74,7 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
     domain = args.test_domain
-    cfg.validation_dataset['args']['subset_paths'] = [domain]
+    #cfg.validation_dataset['args']['subset_paths'] = [domain]
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
