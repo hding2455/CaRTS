@@ -1,17 +1,13 @@
 from torch.utils.data import DataLoader
 from configs import config_dict as config_dict
 from datasets import dataset_dict as dataset_dict
-from datasets import SmokeNoise 
 from torchvision.utils import save_image
-import cv2
 import torch
 import numpy as np
 import time
 import argparse
 import os
-from torchvision.transforms import ColorJitter, GaussianBlur
 from CaRTS import build_model
-import random
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -29,20 +25,13 @@ def dice_score(pred, gt):
     return dice_tool.item(), dice_bg.item()
 
 
-def evaluate(model, dataloader, device, perturbation=None, kinematics_noise=None, save_dir=None, domain="regular"):
+def evaluate(model, dataloader, device, save_dir=None, domain="regular"):
     start = time.time()
     dice_tools = []
     dice_bgs = []
     model.eval()
     for i, (image, gt, kinematics) in enumerate(dataloader):
         data = dict()
-        if perturbation is not None:
-            image = perturbation(image/255) * 255
-        if kinematics_noise is not None:
-            original_kinematics = kinematics.numpy()
-            mask = torch.zeros_like(kinematics)
-            mask[:, :, 0] = 1
-            kinematics = kinematics + kinematics_noise * mask
         data['image'] = image.to(device=device)
         data['gt'] = gt.to(device=device)
         data['kinematics'] = kinematics.to(device=device)
@@ -51,7 +40,7 @@ def evaluate(model, dataloader, device, perturbation=None, kinematics_noise=None
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
-            save_image(net_pred[0], os.path.join(save_dir, 'pred'+str(i)+domain+'.png'))
+            save_image(pred[0], os.path.join(save_dir, 'pred' + str(i) + domain + '.png'))
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
         dice_tools.append(dice_tool)
         dice_bgs.append(dice_bg)
@@ -74,7 +63,7 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
     domain = args.test_domain
-    #cfg.validation_dataset['args']['subset_paths'] = [domain]
+    cfg.validation_dataset['args']['domains'] = [domain]
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
