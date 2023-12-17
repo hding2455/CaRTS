@@ -9,5 +9,4 @@ autoaugmenter = T.AutoAugment(policy, interpolation, fill)
 
 def AutoAugment(img):
     img = T.ToTensor()(img).to(torch.uint8)
-    
     return autoaugmenter(img)
