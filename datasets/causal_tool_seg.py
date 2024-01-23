@@ -66,7 +66,7 @@ class CausalToolSeg(data.Dataset):
             if self.image_transforms is None:
                 image = T.ToTensor()(image)
             else:
-                image = self.image_transforms(image)
+                image, gt = self.image_transforms(image)
             if self.gt_transforms is None:
                 gt = T.ToTensor()(gt)
             else:
