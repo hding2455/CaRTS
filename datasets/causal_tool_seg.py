@@ -7,11 +7,14 @@ from typing import Tuple, List
 from torch.utils.data.dataloader import default_collate
 import torch.utils.data as data
 import torchvision.transforms as T
+import torchvision
 import random
 import cv2
 import scipy.io
 from PIL import Image
 from .augmentation import augmentation_dict
+
+count = 0
 
 def readKinematics(folder):
     kinematics = []
@@ -66,7 +69,8 @@ class CausalToolSeg(data.Dataset):
             if self.image_transforms is None:
                 image = T.ToTensor()(image)
             else:
-                image, gt = self.image_transforms(image)
+                image, gt_transforms = self.image_transforms(image)
+                self.gt_transforms = gt_transforms
             if self.gt_transforms is None:
                 gt = T.ToTensor()(gt)
             else:
@@ -75,6 +79,13 @@ class CausalToolSeg(data.Dataset):
                 kinematics = torch.tensor(kinematics)
             else:
                 kinematics = self.kinematics_transforms(kinematics)
+
+            # global count
+            # if self.gt_transforms is not None:
+            #     torchvision.utils.save_image(image.float()/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img.png")
+            #     torchvision.utils.save_image(gt, f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt.png")
+            #     count += 1
+                
             images.append(image)
             gts.append(gt)
             kinematics_s.append(kinematics.reshape(2, -1))

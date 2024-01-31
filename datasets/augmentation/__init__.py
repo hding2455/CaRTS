@@ -1,4 +1,4 @@
-from .utils import AutoAugment
+from .autoaugment import AutoAugment
 augmentation_dict = {
     "AutoAugment":AutoAugment,
 }
