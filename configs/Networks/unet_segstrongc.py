@@ -18,8 +18,8 @@ class cfg:
         args = dict(
             root_folder = '/data/home/hao/SegSTRONG-C', 
             split = 'train', 
-            set_indices = [3,4,5,6], 
-            subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], 
+            set_indices = [3,4,5,7,8], 
+            subset_indices = [[0,2], [0,1,2], [0,2], [0,1], [1,2]], 
             domains = ['regular'],
             image_transforms = transform,
             gt_transforms = transform,))

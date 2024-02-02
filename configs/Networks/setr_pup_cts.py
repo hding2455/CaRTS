@@ -16,14 +16,14 @@ class cfg:
             video_paths = ["set-1", "set-2", "set-3", "set-5", "set-6", "set-9", "set-10", 
                           'synthetics-set-1',  'synthetics-set-2' , 'synthetics-set-3' , 'synthetics-set-5',  
                           'synthetics-set-6',  'synthetics-set-9', 'synthetics-set-10'],
-            subset_paths = ["regular"]))
+            domains = ["regular"]))
     validation_dataset = dict(
         name = "CausalToolSeg",
         args = dict(
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-12"],
-            subset_paths = ["regular"]))
+            domains = ["regular"]))
     model = dict(
                 name = "SETR_PUP",
                 params = dict(

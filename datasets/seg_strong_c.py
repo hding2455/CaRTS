@@ -30,7 +30,7 @@ class SegSTRONGC(data.Dataset):
 
         for set_idx, s in enumerate(self.set_indices):
             for ss in self.subset_indices[set_idx]:
-                set_folder = osp.join(self.root_folder + '/images', self.split + '/' + str(s) + '/' + str(ss))
+                set_folder = osp.join(self.root_folder, self.split + '/' + str(s) + '/' + str(ss))
                 gt_folder = osp.join(set_folder, 'ground_truth')
                 
                 image_numbers = len(os.listdir(osp.join(gt_folder, 'left')))
