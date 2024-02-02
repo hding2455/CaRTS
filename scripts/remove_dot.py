@@ -1,8 +1,7 @@
 import os
 import os.path as osp
 
-folder = '/Volumes/ANOTHER/dataset/'
-folder = '/Users/dinghao/Downloads/gt_generation_one_piece/'
+folder = '/data/home/hao/endovis2017'
 
 def remove_dot(folder):
     for f in os.listdir(folder):
