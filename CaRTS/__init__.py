@@ -1,5 +1,5 @@
 from .carts import CaRTS
-from .vision import Unet, HRNet, STM, DeepLabv3_plus, Segformer, SETR_Naive, SETR_MLA, SETR_PUP
+from .vision import Unet, HRNet, STM, DeepLabv3_plus, Segformer, SETR_Naive, SETR_MLA, SETR_PUP, SegmentationTTAWrapper
 
 model_dict = {
                 "CaRTS": CaRTS,
@@ -11,6 +11,7 @@ model_dict = {
                 "SETR_PUP": SETR_PUP,
                 "DeepLabv3_plus": DeepLabv3_plus,
                 "Segformer": Segformer,
+                "SegmentationTTAWrapper": SegmentationTTAWrapper,
             }
 
 def build_model(model, device):
