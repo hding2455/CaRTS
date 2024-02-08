@@ -79,7 +79,7 @@ class cfg:
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-11"],
-            subset_paths = ["alternative_bg"]))
+            domains = ["alternative_bg"]))
     model = dict(
         name = "CaRTS",
         params = dict(

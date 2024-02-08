@@ -23,7 +23,7 @@ class cfg:
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-12"],
-            subset_paths = ["regular"]))
+            domains = ["regular"]))
     model = dict(
                 name = "Unet",
                 params = dict(

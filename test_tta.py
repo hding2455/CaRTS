@@ -1,6 +1,6 @@
+from datasets.tta import SegmentationTTAWrapper
+from datasets.tta import d4_transform
 from torch.utils.data import DataLoader
-from CaRTS.vision.tta import SegmentationTTAWrapper
-from CaRTS.vision.tta import d4_transform
 from configs import config_dict as config_dict
 from datasets import dataset_dict as dataset_dict
 from torchvision.utils import save_image
@@ -38,12 +38,14 @@ def evaluate(model, dataloader, device, save_dir=None, domain="regular"):
         data['gt'] = gt.to(device=device)
         data['kinematics'] = kinematics.to(device=device)
         data['iteration'] = i
-        pred = model(data)['pred']
+        #pred = model(data)['pred']
+        pred = model(data['image'])
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
             save_image(pred[0], os.path.join(save_dir, 'pred' + str(i) + domain + '.png'))
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
+        print(dice_tool, dice_bg)
         dice_tools.append(dice_tool)
         dice_bgs.append(dice_bg)
 
@@ -70,4 +72,6 @@ if __name__ == "__main__":
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)
+    model = SegmentationTTAWrapper(model, d4_transform(), merge_mode='mean')
     evaluate(model, validation_dataloader, device, save_dir=None, domain=domain)
+
