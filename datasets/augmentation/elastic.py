@@ -111,7 +111,7 @@ class ElasticTransform(torch.nn.Module):
         displacement = self.get_params(self.alpha, self.sigma, [height, width])
         prob = torch.rand(1)
         if prob < 0.5:
-            transform = lambda x : F.(x, displacement, self.interpolation, self.fill)
+            transform = lambda x : F.elastic_transform(x, displacement, self.interpolation, self.fill)
             return transform(tensor), [transform]
         
         return tensor, None

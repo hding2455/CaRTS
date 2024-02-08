@@ -74,7 +74,6 @@ class CausalToolSeg(data.Dataset):
             if self.gt_transforms is None:
                 gt = T.ToTensor()(gt)
             else:
-                self.gt_transforms = T.Compose()
                 gt = self.gt_transforms(gt)
             if self.kinematics_transforms is None:
                 kinematics = torch.tensor(kinematics)

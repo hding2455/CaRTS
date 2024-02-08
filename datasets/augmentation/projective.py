@@ -2,7 +2,7 @@ import torch
 from torch import Tensor
 
 import torchvision.transforms as T
-from torchvision.transforms.transforms import functional as F
+from torchvision.transforms import functional as F
 from torchvision.transforms.functional import _interpolation_modes_from_int, InterpolationMode
 from collections.abc import Sequence
 from typing import List, Optional, Tuple, Union
@@ -64,9 +64,10 @@ class RandomPerspective(torch.nn.Module):
 
         if torch.rand(1) < self.p:
             startpoints, endpoints = self.get_params(width, height, self.distortion_scale)
-            transform = lambda x : F.perspective(x, startpoints, endpoints, self.interpolation, fill)
-            gt_transforms.append(transform)
-            return transform(img), gt_transforms
+            image_transform = lambda x : F.perspective(x, startpoints, endpoints, self.interpolation, fill)
+            gt_transform = lambda x : F.perspective(x, startpoints, endpoints, self.interpolation, [0.0])
+            gt_transforms.append(gt_transform)
+            return image_transform(img), gt_transforms
         return img, gt_transforms
 
 
@@ -109,10 +110,11 @@ class RandomPerspective(torch.nn.Module):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(p={self.p})"
     
+projective_transformer = RandomPerspective()
 
-def AutoAugment(img):
+def Projective(img):
     img = T.ToTensor()(img).to(torch.uint8)
-    img, gt_transforms = RandomPerspective(img)
+    img, gt_transforms = projective_transformer(img)
 
     if gt_transforms != []:
         gt_transforms.insert(0, T.ToTensor())
