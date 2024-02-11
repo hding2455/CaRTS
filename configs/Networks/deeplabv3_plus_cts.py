@@ -16,20 +16,19 @@ class cfg:
             video_paths = ["set-1", "set-2", "set-3", "set-5", "set-6", "set-9", "set-10", 
                           'synthetics-set-1',  'synthetics-set-2' , 'synthetics-set-3' , 'synthetics-set-5',  
                           'synthetics-set-6',  'synthetics-set-9', 'synthetics-set-10'],
-            domains = ["regular"]))
+            subset_paths = ["regular"]))
     validation_dataset = dict(
         name = "CausalToolSeg",
         args = dict(
             series_length = 1,
             folder_path = "/data/hao/processed_data",
             video_paths = ["set-12"],
-            domains = ["regular"]))
+            subset_paths = ["regular"]))
     model = dict(
-                name = "Unet",
+                name = "DeepLabv3_plus",
                 params = dict(
-                    input_dim = 3,
-                    hidden_dims = [512, 256, 128, 64, 32],
-                    size = (15, 20),
+                    InputChannels = 3,
+                    os = 16, 
                     target_size = (360, 500),
                     criterion = BCELoss(),
                     train_params = dict(
@@ -47,5 +46,5 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=20,
                         save_interval=5,
-                        save_path='./checkpoints/unet_cts/',
+                        save_path='./checkpoints/deeplabv3_plus_cts/',
                         log_interval=50)))
