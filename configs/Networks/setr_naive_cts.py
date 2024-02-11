@@ -25,12 +25,20 @@ class cfg:
             video_paths = ["set-12"],
             domains = ["regular"]))
     model = dict(
-                name = "Unet",
+                name = "SETR_Naive",
                 params = dict(
-                    input_dim = 3,
-                    hidden_dims = [512, 256, 128, 64, 32],
-                    size = (15, 20),
-                    target_size = (360, 500),
+                    img_dim = (360, 480),
+                    patch_dim = 15,
+                    num_channels = 3,
+                    num_classes = 1,
+                    embedding_dim = 1024,
+                    num_heads = 16,
+                    num_layers = 24,
+                    hidden_dim = 4096,
+                    dropout_rate = 0.1,
+                    attn_dropout_rate = 0.1,
+                    conv_patch_representation = False,
+                    positional_encoding_type = "learned",
                     criterion = BCELoss(),
                     train_params = dict(
                         perturbation = SmokeNoise((360,480), smoke_aug=0.3, p=0.2),
@@ -45,7 +53,7 @@ class cfg:
                                 lr = 0.01,
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
-                        max_epoch_number=20,
+                        max_epoch_number=50,
                         save_interval=5,
-                        save_path='./checkpoints/unet_cts/',
+                        save_path='./checkpoints/setr_naive_cts/',
                         log_interval=50)))
