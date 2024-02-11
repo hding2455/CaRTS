@@ -107,14 +107,16 @@ class ElasticTransform(torch.nn.Module):
         Returns:
             PIL Image or Tensor: Transformed image.
         """
+        gt_transforms = []
         _, height, width = F.get_dimensions(tensor)
         displacement = self.get_params(self.alpha, self.sigma, [height, width])
         prob = torch.rand(1)
         if prob < 0.5:
-            transform = lambda x : F.elastic_transform(x, displacement, self.interpolation, self.fill)
-            return transform(tensor), [transform]
+            img_transform = lambda x : F.elastic_transform(x, displacement, self.interpolation, self.fill)
+            gt_transforms.append(img_transform)
+            return img_transform(tensor), gt_transforms
         
-        return tensor, None
+        return tensor, gt_transforms
 
     def __repr__(self):
         format_string = self.__class__.__name__
@@ -127,9 +129,14 @@ class ElasticTransform(torch.nn.Module):
 elastic_transformer = ElasticTransform()
 
 def Elastic(img):
-    img = T.ToTensor()(img).to(torch.uint8)
     img, gt_transforms = elastic_transformer(img)
 
-    return img, gt_transforms
+    if gt_transforms != []:
+        gt_transforms = T.Compose(gt_transforms)
+    else:
+        gt_transforms = None
+
+
+    return (img, gt_transforms)
 
     

@@ -4,6 +4,7 @@ from .Networks import UNet_CTS, HRNet_CTS
 from .Augmentation import UNet_CTS_AutoAugment
 from .Augmentation import UNet_CTS_Elastic
 from .Augmentation import UNet_CTS_Projective
+from .Augmentation import UNet_CTS_Combine
 
 config_dict = {
         "CaRTS_AMBF": CaRTS_AMBF,
@@ -14,4 +15,5 @@ config_dict = {
         "UNet_CTS_AutoAugment": UNet_CTS_AutoAugment,
         "UNet_CTS_Elastic": UNet_CTS_Elastic,
         "UNet_CTS_Projective": UNet_CTS_Projective,
+        "UNet_CTS_Combine": UNet_CTS_Combine,
         }

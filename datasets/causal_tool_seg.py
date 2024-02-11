@@ -12,7 +12,6 @@ import random
 import cv2
 import scipy.io
 from PIL import Image
-from .augmentation import augmentation_dict
 
 count = 0
 
@@ -49,7 +48,7 @@ class CausalToolSeg(data.Dataset):
                     self.gt_paths.append(osp.join(osp.join(gt_path, 'ground_truth_l'), str(i) + ".png"))
                 self.kinematics.append(kinemactis)
 
-        self.image_transforms = T.Compose([augmentation_dict[transform] for transform in image_transforms]) if image_transforms is not None else None
+        self.image_transforms = image_transforms
         self.gt_transforms = gt_transforms
         self.kinematics_transforms = kinematics_transforms
         self.series_length = series_length
@@ -64,24 +63,39 @@ class CausalToolSeg(data.Dataset):
         kinematics_s = []
         for i in range(self.series_length):
             image = np.array(Image.open(self.image_paths[idx+i])).astype(np.float32)
+            img_before = image.transpose(2,0,1)
             gt = (np.array(Image.open(self.gt_paths[idx+i]))/255).astype(np.float32)
+            gt_before = gt
             kinematics = (self.kinematics[idx+i]).astype(np.float32)
-            if self.image_transforms is None:
-                image = T.ToTensor()(image)
-            else:
-                image, gt_transforms = self.image_transforms(image)
-                self.gt_transforms = gt_transforms
-            if self.gt_transforms is None:
-                gt = T.ToTensor()(gt)
-            else:
-                gt = self.gt_transforms(gt)
+
+            image = T.ToTensor()(image).to(torch.uint8)
+            gt = T.ToTensor()(gt)
+            
+            # flag = False
+
+            # Apply transformation to image and ground truth
+            if self.image_transforms is not None:
+                for image_transform in self.image_transforms:
+                    output = image_transform(image)
+                    # User defined transformation 
+                    if isinstance(output, tuple):
+                        image, gt_transforms = output
+                        if gt_transforms is not None:
+                            # flag = True
+                            gt = gt_transforms(gt)
+                    else:
+                        image = output
+                    
+
             if self.kinematics_transforms is None:
                 kinematics = torch.tensor(kinematics)
             else:
                 kinematics = self.kinematics_transforms(kinematics)
 
             # global count
-            # if self.gt_transforms is not None:
+            # if flag:
+            #     torchvision.utils.save_image(torch.from_numpy(img_before)/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img_before.png")
+            #     torchvision.utils.save_image(torch.from_numpy(gt_before), f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt_before.png")
             #     torchvision.utils.save_image(image.float()/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img.png")
             #     torchvision.utils.save_image(gt, f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt.png")
             #     count += 1

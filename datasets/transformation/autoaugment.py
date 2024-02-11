@@ -300,14 +300,12 @@ policy = AutoAugmentPolicy.IMAGENET
 autoaugmenter = AutoAugmentModel(policy)
 
 def AutoAugment(img):
-    img = T.ToTensor()(img).to(torch.uint8)
     img, gt_transforms = autoaugmenter(img)
 
     if gt_transforms != []:
-        gt_transforms.insert(0, T.ToTensor())
         gt_transforms = T.Compose(gt_transforms)
     else:
         gt_transforms = None
 
-    return img, gt_transforms
+    return (img, gt_transforms)
 

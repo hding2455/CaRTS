@@ -6,6 +6,9 @@ from torch.optim.lr_scheduler import StepLR
 import numpy as np
 import torch
 from datasets import SmokeNoise
+from datasets.transformation.autoaugment import AutoAugment
+from datasets.transformation.elastic import Elastic
+from datasets.transformation.projective import Projective
 
 class cfg:
     train_dataset = dict(
@@ -17,7 +20,7 @@ class cfg:
                           'synthetics-set-1',  'synthetics-set-2' , 'synthetics-set-3' , 'synthetics-set-5',  
                           'synthetics-set-6',  'synthetics-set-9', 'synthetics-set-10'],
             subset_paths = ["regular"],
-            image_transforms = ["Projective"]))
+            image_transforms = [AutoAugment, Elastic, Projective]))
     validation_dataset = dict(
         name = "CausalToolSeg",
         args = dict(
@@ -48,5 +51,5 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=20,
                         save_interval=5,
-                        save_path='./checkpoints/unet_cts_projective/',
+                        save_path='./checkpoints/unet_cts_autoaugment/',
                         log_interval=50)))

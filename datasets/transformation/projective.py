@@ -113,13 +113,11 @@ class RandomPerspective(torch.nn.Module):
 projective_transformer = RandomPerspective()
 
 def Projective(img):
-    img = T.ToTensor()(img).to(torch.uint8)
     img, gt_transforms = projective_transformer(img)
 
     if gt_transforms != []:
-        gt_transforms.insert(0, T.ToTensor())
         gt_transforms = T.Compose(gt_transforms)
     else:
         gt_transforms = None
 
-    return img, gt_transforms
+    return (img, gt_transforms)
