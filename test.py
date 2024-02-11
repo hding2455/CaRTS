@@ -1,6 +1,4 @@
 from torch.utils.data import DataLoader
-from CaRTS.vision.tta import SegmentationTTAWrapper
-from CaRTS.vision.tta import d4_transform
 from configs import config_dict as config_dict
 from datasets import dataset_dict as dataset_dict
 from torchvision.utils import save_image
