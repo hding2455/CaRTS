@@ -2,7 +2,7 @@ import torch
 import itertools
 from functools import partial
 import torch.nn as nn
-from typing import Optional, Mapping, Union, Tuple, List
+from typing import Mapping, Union, List
 
 class functional:
     def __init__(self):
