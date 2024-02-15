@@ -67,26 +67,27 @@ class CausalToolSeg(data.Dataset):
             gt = (np.array(Image.open(self.gt_paths[idx+i]))/255).astype(np.float32)
             gt_before = gt
             kinematics = (self.kinematics[idx+i]).astype(np.float32)
-
-            image = T.ToTensor()(image).to(torch.uint8)
-            gt = T.ToTensor()(gt)
             
-            # flag = False
+            flag = False
 
             # Apply transformation to image and ground truth
             if self.image_transforms is not None:
-                for image_transform in self.image_transforms:
+                for i, image_transform in enumerate(self.image_transforms):
+
+                    # Apply the same image transformation to gt
                     output = image_transform(image)
+                    if self.gt_transforms[i]:
+                        gt = image_transform(gt)
+
                     # User defined transformation 
                     if isinstance(output, tuple):
                         image, gt_transforms = output
                         if gt_transforms is not None:
-                            # flag = True
+                            flag = True
                             gt = gt_transforms(gt)
                     else:
                         image = output
                     
-
             if self.kinematics_transforms is None:
                 kinematics = torch.tensor(kinematics)
             else:

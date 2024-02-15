@@ -9,6 +9,8 @@ from datasets import SmokeNoise
 from datasets.transformation.autoaugment import AutoAugment
 from datasets.transformation.elastic import Elastic
 from datasets.transformation.projective import Projective
+from torchvision.transforms.transforms import ToTensor
+from torchvision.transforms.transforms import CenterCrop
 
 class cfg:
     train_dataset = dict(
@@ -20,7 +22,8 @@ class cfg:
                           'synthetics-set-1',  'synthetics-set-2' , 'synthetics-set-3' , 'synthetics-set-5',  
                           'synthetics-set-6',  'synthetics-set-9', 'synthetics-set-10'],
             domains = ["regular"],
-            image_transforms = [AutoAugment, Elastic, Projective]))
+            image_transforms = [ToTensor(), lambda x : x.to(torch.uint8), AutoAugment, Elastic, Projective, CenterCrop(size=100)],
+            gt_transforms = [True, False, False, False, False, True]))
     validation_dataset = dict(
         name = "CausalToolSeg",
         args = dict(
