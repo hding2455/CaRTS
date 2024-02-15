@@ -7,10 +7,13 @@ from typing import Tuple, List
 from torch.utils.data.dataloader import default_collate
 import torch.utils.data as data
 import torchvision.transforms as T
+import torchvision
 import random
 import cv2
 import scipy.io
 from PIL import Image
+
+count = 0
 
 def readKinematics(folder):
     kinematics = []
@@ -60,20 +63,44 @@ class CausalToolSeg(data.Dataset):
         kinematics_s = []
         for i in range(self.series_length):
             image = np.array(Image.open(self.image_paths[idx+i])).astype(np.float32)
+            img_before = image.transpose(2,0,1)
             gt = (np.array(Image.open(self.gt_paths[idx+i]))/255).astype(np.float32)
+            gt_before = gt
             kinematics = (self.kinematics[idx+i]).astype(np.float32)
-            if self.image_transforms is None:
-                image = T.ToTensor()(image)
-            else:
-                image = self.image_transforms(image)
-            if self.gt_transforms is None:
-                gt = T.ToTensor()(gt)
-            else:
-                gt = self.gt_transforms(gt)
+            
+            flag = False
+
+            # Apply transformation to image and ground truth
+            if self.image_transforms is not None:
+                for i, image_transform in enumerate(self.image_transforms):
+
+                    # Apply the same image transformation to gt
+                    output = image_transform(image)
+                    if self.gt_transforms[i]:
+                        gt = image_transform(gt)
+
+                    # User defined transformation 
+                    if isinstance(output, tuple):
+                        image, gt_transforms = output
+                        if gt_transforms is not None:
+                            flag = True
+                            gt = gt_transforms(gt)
+                    else:
+                        image = output
+                    
             if self.kinematics_transforms is None:
                 kinematics = torch.tensor(kinematics)
             else:
                 kinematics = self.kinematics_transforms(kinematics)
+
+            # global count
+            # if flag:
+            #     torchvision.utils.save_image(torch.from_numpy(img_before)/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img_before.png")
+            #     torchvision.utils.save_image(torch.from_numpy(gt_before), f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt_before.png")
+            #     torchvision.utils.save_image(image.float()/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img.png")
+            #     torchvision.utils.save_image(gt, f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt.png")
+            #     count += 1
+                
             images.append(image)
             gts.append(gt)
             kinematics_s.append(kinematics.reshape(2, -1))
