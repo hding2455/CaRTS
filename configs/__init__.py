@@ -23,4 +23,5 @@ config_dict = {
         "Segformer_CTS": Segformer_CTS,
         "UNet_SEGSTRONGC": UNet_SEGSTRONGC,
         "UNet_ENDOVIS": UNet_ENDOVIS,
+        "TTA_Unet_CTS": TTA_Unet_CTS,
         }
