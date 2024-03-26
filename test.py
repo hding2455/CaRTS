@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument("--config", type=str)
     parser.add_argument("--model_path", type=str)
     parser.add_argument("--test_domain", type=str, default=None)
+    parser.add_argument("--tau", type=int, default=5)
     args = parser.parse_args()
     return args
 
@@ -36,7 +37,7 @@ def dice_score(pred, gt):
     return dice_tool, dice_bg
 
 
-def evaluate(model, dataloader, device, save_dir=None):
+def evaluate(model, dataloader, device, tau, save_dir=None):
     start = time.time()
     dice_tools = []
     dice_bgs = []
@@ -54,11 +55,11 @@ def evaluate(model, dataloader, device, save_dir=None):
                 os.mkdir(save_dir)
             save_image(pred[0], os.path.join(save_dir, 'pred' + str(i) + '.png'))
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
-        nsd = normalized_surface_distance(pred, data['gt'], tau=50)
+        nsd = normalized_surface_distance(pred, data['gt'], tau)
         dice_tools.append(dice_tool)
         dice_bgs.append(dice_bg)
-        print(nsd)
         nsds.append(nsd)
+        print(i)
 
     elapsed = time.time() - start
     print("iteration per Sec: %f \n mean: dice_bg: %f dice_tool: %f " %
@@ -89,4 +90,5 @@ if __name__ == "__main__":
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)
-    evaluate(model, validation_dataloader, device, save_dir=None)
+    tau = args.tau
+    evaluate(model, validation_dataloader, device, tau, save_dir=None)
