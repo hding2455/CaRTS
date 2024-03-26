@@ -63,9 +63,7 @@ class CausalToolSeg(data.Dataset):
         kinematics_s = []
         for i in range(self.series_length):
             image = np.array(Image.open(self.image_paths[idx+i])).astype(np.float32)
-            img_before = image.transpose(2,0,1)
             gt = (np.array(Image.open(self.gt_paths[idx+i]))/255).astype(np.float32)
-            gt_before = gt
             kinematics = (self.kinematics[idx+i]).astype(np.float32)
             
             flag = False
@@ -83,7 +81,6 @@ class CausalToolSeg(data.Dataset):
                     if isinstance(output, tuple):
                         image, gt_transforms = output
                         if gt_transforms is not None:
-                            flag = True
                             gt = gt_transforms(gt)
                     else:
                         image = output

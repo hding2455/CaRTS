@@ -6,6 +6,7 @@ from .CTS.Augmentation import UNet_CTS_Elastic
 from .CTS.Augmentation import UNet_CTS_Projective
 from .CTS.Augmentation import UNet_CTS_Combine
 from .SegSTRONGC.Networks import UNet_SegSTRONGC, Segformer_SegSTRONGC
+from .SegSTRONGC.Augmentation import UNet_SegSTRONGC_Projective
 
 config_dict = {
         "CaRTS_AMBF": CaRTS_AMBF,
@@ -24,4 +25,5 @@ config_dict = {
         "Segformer_CTS": Segformer_CTS,
         "UNet_SegSTRONGC": UNet_SegSTRONGC,
         "UNet_ENDOVIS": UNet_ENDOVIS,
+        "UNet_SegSTRONGC_Projective": UNet_SegSTRONGC_Projective,
         }

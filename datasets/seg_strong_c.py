@@ -53,15 +53,27 @@ class SegSTRONGC(data.Dataset):
     def __getitem__(self, idx: int):
         image = np.array(Image.open(self.image_paths[idx])).astype(np.float32)
         gt = np.load(self.gt_paths[idx]).astype(np.float32)
-        if self.image_transforms is None:
-            image = T.ToTensor()(image)
-        else:
-            image = self.image_transforms(image)
-        if self.gt_transforms is None:
-            gt = T.ToTensor()(gt)
-        else:
-            gt = self.gt_transforms(gt)
-        return image, gt, image
+
+        # Apply transformation to image and ground truth
+        if self.image_transforms is not None:
+            for i, image_transform in enumerate(self.image_transforms):
+
+                # Apply the same image transformation to gt
+                output = image_transform(image)
+                if self.gt_transforms[i]:
+                    gt = image_transform(gt)
+
+                # User defined transformation 
+                if isinstance(output, tuple):
+                    image, gt_transforms = output
+                    print(image.shape)
+                    print(gt_transforms)
+                    if gt_transforms is not None:
+                        gt = gt_transforms(gt)
+                else:
+                    image = output
+
+        return image, gt
 
 if __name__ == '__main__':
     segstrong = SegSTRONGC(root_folder = '/data/home/hao/SegSTRONG-C', split = 'train', set_indices = [3,4,5,6], subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], domains = ['regular'])
