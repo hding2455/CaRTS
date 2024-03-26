@@ -8,6 +8,7 @@ import time
 import argparse
 import os
 from CaRTS import build_model
+from scripts.evaluation import normalized_surface_distance
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -39,6 +40,7 @@ def evaluate(model, dataloader, device, save_dir=None):
     start = time.time()
     dice_tools = []
     dice_bgs = []
+    nsds = []
     model.eval()
     for i, (image, gt, kinematics) in enumerate(dataloader):
         data = dict()
@@ -52,15 +54,22 @@ def evaluate(model, dataloader, device, save_dir=None):
                 os.mkdir(save_dir)
             save_image(pred[0], os.path.join(save_dir, 'pred' + str(i) + '.png'))
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
-        print(dice_tool)
+        nsd = normalized_surface_distance(pred, data['gt'], tau=50)
         dice_tools.append(dice_tool)
         dice_bgs.append(dice_bg)
+        print(nsd)
+        nsds.append(nsd)
 
     elapsed = time.time() - start
     print("iteration per Sec: %f \n mean: dice_bg: %f dice_tool: %f " %
         ((i+1) / elapsed, np.mean([dice_bgs]), np.mean([dice_tools])))
     print("std: dice_bg: %f dice_tool: %f " %
-            (np.std([dice_bgs]), np.std([dice_tools])))
+        (np.std([dice_bgs]), np.std([dice_tools])))
+    print("mean: nsd: %f" %
+        (np.mean([nsds])))
+    print("std: nsd: %f" %
+        (np.std([nsds])))
+    
 
 
 

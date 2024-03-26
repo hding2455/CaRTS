@@ -105,6 +105,7 @@ class Unet(VisionBase):
 
     def get_feature_map(self, x):
         image = x['image']
+        image = image.permute(0,3,1,2)
         #image = nn.functional.interpolate(image, size=(self.target_size[0], self.target_size[1]), mode='bilinear')
         x1 = self.inc(image)
         x2 = self.down1(x1)
@@ -122,7 +123,7 @@ class Unet(VisionBase):
         result = self.outc(feature_map)
         if return_loss:
             gt = x['gt']
-            loss = self.criterion(result.sigmoid(), gt)
+            loss = self.criterion(result.sigmoid().squeeze(), gt)
             return result, loss
         else:
             x['pred'] = result.sigmoid()
