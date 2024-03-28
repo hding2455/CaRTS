@@ -8,13 +8,14 @@ import time
 import argparse
 import os
 from CaRTS import build_model
-from scripts.evaluation import dice_score, normalized_surface_distance
+from CaRTS.evaluation.evaluation import dice_score, normalized_surface_distance
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str)
     parser.add_argument("--model_path", type=str)
-    parser.add_argument("--test_domain", type=str, default=None)
+    parser.add_argument("--dataset", type=str)
+    parser.add_argument("--domain", type=str, default=None)
     parser.add_argument("--tau", type=int, default=5)
     args = parser.parse_args()
     return args
@@ -34,7 +35,7 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         pred = model(data)['pred']
         if save_dir is not None:
             if not os.path.exists(save_dir):
-                os.mkdir(save_dir)
+                os.makedirs(save_dir)
                 np.save(os.path.join(save_dir, 'pred' + str(i)), pred[0])
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
         nsd = normalized_surface_distance(pred, data['gt'], tau)
@@ -63,12 +64,28 @@ if __name__ == "__main__":
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
-    if args.test_domain is not None:
-        domain = args.test_domain
-        cfg.validation_dataset['args']['domains'] = [domain]
-    validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
-    validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
+
+        cfg.validation_dataset['args']['domains'] = [args.domain]
+
+    if args.domain is not None:
+        domain = args.domain
+        if args.dataset == "validation":
+            cfg.validation_dataset['args']['domains'] = [domain]
+        elif args.dataset == "test":
+            cfg.test_dataset['args']['domains'] = [domain]
+
+    dataset = None
+    datatloader = None
+
+    if args.dataset == "validation":
+        dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
+        dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+    elif args.dataset == "test":
+        dataset = dataset_dict[cfg.test_dataset['name']](**(cfg.test_dataset['args']))
+        dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)
-    save_dir = os.path.join("result", args.test_domain, cfg.model['name'])
-    evaluate(model, validation_dataloader, device, args.tau, save_dir)
+    save_dir = os.path.join(os.getcwd(), "results", args.dataset, args.domain, cfg.model['name'])
+    evaluate(model, dataloader, device, args.tau, save_dir)
