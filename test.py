@@ -8,7 +8,7 @@ import time
 import argparse
 import os
 from CaRTS import build_model
-from scripts.evaluation import normalized_surface_distance
+from scripts.evaluation import dice_score, normalized_surface_distance
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -19,41 +19,23 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def dice_score(pred, gt):
-    bg = pred < 0.5
-    tool = pred > 0.5
-    if (gt.sum() + tool.sum()) == 0 and 2*(tool * gt).sum() == 0:
-        dice_tool = 1
-    elif (gt.sum() + tool.sum()) == 0:
-        dice_tool = 0
-    else:
-        dice_tool = (2*(tool * gt).sum() / (gt.sum() + tool.sum())).item()
-    if ((1-gt).sum() + bg.sum()) == 0 and 2*(bg*(1-gt)).sum() == 0:
-        dice_bg = 1
-    elif ((1-gt).sum() + bg.sum()) == 0:
-        dice_bg = 0
-    else:
-        dice_bg = (2*(bg*(1-gt)).sum() / ((1-gt).sum() + bg.sum())).item()
-    return dice_tool, dice_bg
-
-
 def evaluate(model, dataloader, device, tau, save_dir=None):
     start = time.time()
     dice_tools = []
     dice_bgs = []
     nsds = []
     model.eval()
-    for i, (image, gt, kinematics) in enumerate(dataloader):
+    print(len(next(iter(dataloader))))
+    for i, (image, gt) in enumerate(dataloader):
         data = dict()
         data['image'] = image.to(device=device)
         data['gt'] = gt.to(device=device)
-        data['kinematics'] = kinematics.to(device=device)
         data['iteration'] = i
         pred = model(data)['pred']
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
-            save_image(pred[0], os.path.join(save_dir, 'pred' + str(i) + '.png'))
+                np.save(os.path.join(save_dir, 'pred' + str(i)), pred[0])
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
         nsd = normalized_surface_distance(pred, data['gt'], tau)
         dice_tools.append(dice_tool)
@@ -72,8 +54,6 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         (np.std([nsds])))
     
 
-
-
 if __name__ == "__main__":
     args = parse_args()
     cfg = config_dict[args.config]
@@ -90,5 +70,5 @@ if __name__ == "__main__":
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)
-    tau = args.tau
-    evaluate(model, validation_dataloader, device, tau, save_dir=None)
+    save_dir = os.path.join("result", args.test_domain, cfg.model['name'])
+    evaluate(model, validation_dataloader, device, args.tau, save_dir)
