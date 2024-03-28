@@ -66,12 +66,14 @@ class SegSTRONGC(data.Dataset):
                 # User defined transformation 
                 if isinstance(output, tuple):
                     image, gt_transforms = output
-                    print(image.shape)
-                    print(gt_transforms)
                     if gt_transforms is not None:
                         gt = gt_transforms(gt)
                 else:
                     image = output
+        else:
+                image = T.ToTensor()(image)
+                gt = T.ToTensor()(gt)
+
 
         return image, gt
 

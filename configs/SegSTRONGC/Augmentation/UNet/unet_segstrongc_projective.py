@@ -35,6 +35,16 @@ class cfg:
             domains = ['regular'],
             image_transforms = transform,
             gt_transforms = transform,))
+    test_dataset = dict(
+        name = "SegSTRONGC",
+        args = dict(
+            root_folder = '/data/home/hao/SegSTRONG-C', 
+            split = 'test', 
+            set_indices = [2,9], 
+            subset_indices = [[0,2],[0,1,2]], 
+            domains = ['regular'],
+            image_transforms = transform,
+            gt_transforms = transform,))
     model = dict(
                 name = "Unet",
                 params = dict(
