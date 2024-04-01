@@ -17,7 +17,7 @@ class cfg:
         name = "SegSTRONGC",
         args = dict(
             root_folder = '/data/home/hao/SegSTRONG-C', 
-            split = 'train', 
+            split = 'train',
             set_indices = [3,4,5,7,8], 
             subset_indices = [[0,2], [0,1,2], [0,2], [0,1], [1,2]], 
             domains = ['regular'],
@@ -34,7 +34,7 @@ class cfg:
             image_transforms = transform,
             gt_transforms = transform,))
     model = dict(
-                name = "Unet",
+                name = "SETR_MLA",
                 params = dict(
                     input_dim = 3,
                     hidden_dims = [512, 256, 128, 64, 32],
@@ -56,5 +56,5 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=20,
                         save_interval=5,
-                        save_path='./checkpoints/unet_segstrongc/',
+                        save_path='./checkpoints/setr_mla_segstrongc/',
                         log_interval=50)))

@@ -52,7 +52,7 @@ def evaluate(model, dataloader, device, save_dir=None):
                 os.mkdir(save_dir)
             save_image(pred[0], os.path.join(save_dir, 'pred' + str(i) + '.png'))
         dice_tool, dice_bg = dice_score(pred, data['gt'][:,-1])
-        print(dice_tool)
+        # print(dice_tool)
         dice_tools.append(dice_tool)
         dice_bgs.append(dice_bg)
 
