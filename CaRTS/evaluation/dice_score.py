@@ -17,7 +17,6 @@
 #     return dice_scores
 
 def dice_score(pred, gt):
-    bg = pred < 0.5
     tool = pred > 0.5
     if (gt.sum() + tool.sum()) == 0 and 2*(tool * gt).sum() == 0:
         dice_tool = 1
@@ -25,11 +24,5 @@ def dice_score(pred, gt):
         dice_tool = 0
     else:
         dice_tool = (2*(tool * gt).sum() / (gt.sum() + tool.sum())).item()
-    if ((1-gt).sum() + bg.sum()) == 0 and 2*(bg*(1-gt)).sum() == 0:
-        dice_bg = 1
-    elif ((1-gt).sum() + bg.sum()) == 0:
-        dice_bg = 0
-    else:
-        dice_bg = (2*(bg*(1-gt)).sum() / ((1-gt).sum() + bg.sum())).item()
-    return dice_tool, dice_bg
+    return dice_tool
     

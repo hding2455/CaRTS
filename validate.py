@@ -8,7 +8,8 @@ import time
 import argparse
 import os
 from CaRTS import build_model
-from CaRTS.evaluation.evaluation import dice_score, normalized_surface_distance
+from CaRTS.evaluation.dice_score import dice_score
+from CaRTS.evaluation.normalized_surface_distance import normalized_surface_distance
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -26,7 +27,7 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
     dice_bgs = []
     nsds = []
     model.eval()
-    print(len(next(iter(dataloader))))
+    print(len(dataloader))
     for i, (image, gt) in enumerate(dataloader):
         data = dict()
         data['image'] = image.to(device=device)

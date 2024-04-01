@@ -1,6 +1,6 @@
 from .CTS.CaRTS import CaRTS_AMBF, CaRTS_CTS
 from .CTS.TC_CaRTS import TCCaRTS_CTS
-from .CTS.Networks import UNet_CTS, HRNet_CTS, DeepLabv3_plus_CTS, Segformer_CTS, SETR_Naive_CTS, SETR_MLA_CTS, SETR_PUP_CTS, UNet_SEGSTRONGC, UNet_ENDOVIS
+from .CTS.Networks import UNet_CTS, HRNet_CTS, DeepLabv3_plus_CTS, Segformer_CTS, SETR_Naive_CTS, SETR_MLA_CTS, SETR_PUP_CTS, UNet_ENDOVIS
 from .CTS.Augmentation import UNet_CTS_AutoAugment
 from .CTS.Augmentation import UNet_CTS_Elastic
 from .CTS.Augmentation import UNet_CTS_Projective
