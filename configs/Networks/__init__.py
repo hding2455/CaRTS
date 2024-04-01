@@ -7,4 +7,6 @@ from .deeplabv3_plus_cts import cfg as DeepLabv3_plus_CTS
 from .segformer_cts import cfg as Segformer_CTS
 from .unet_segstrongc import cfg as UNet_SEGSTRONGC
 from .unet_endovis import cfg as UNet_ENDOVIS
+from .unet_robustmis import cfg as UNet_ROBUSTMIS
+from .unet_open_gen_surgery import cfg as UNet_OPENGENSURGERY
 

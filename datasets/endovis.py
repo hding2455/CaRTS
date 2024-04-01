@@ -106,21 +106,21 @@ class EndoVis(data.Dataset):
         return len(self.image_paths)
 
     def __getitem__(self, idx: int):
-        image = np.array(Image.open(self.image_paths[idx])).astype(np.float32)
+        raw_image = np.array(Image.open(self.image_paths[idx])).astype(np.float32) / 255.0
         gt = np.array(Image.open(self.gt_paths[idx])).astype(np.uint8)
         label = self.label_converter.color2label(gt)
         super_label = self.label_converter.label2superlabel(label)
         if self.image_transforms is None:
-            image = T.ToTensor()(image)
+            image = T.ToTensor()(raw_image)
         else:
-            image = self.image_transforms(image)
+            image = self.image_transforms(raw_image)
         if self.gt_transforms is None:
             label = T.ToTensor()(label)
             super_label =  T.ToTensor()(super_label)
         else:
             label = self.gt_transforms(label)
             super_label = self.gt_transforms(super_label)
-        return image, super_label, label
+        return image, super_label, raw_image
 
 if __name__ == '__main__':
     endo18 = EndoVis(root_folder = '/data/home/hao/endovis2018', split_folders = ['trainval'], sequence_ids = [[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16]])

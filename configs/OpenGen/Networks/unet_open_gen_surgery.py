@@ -20,6 +20,11 @@ gt_transform =  T.Compose([
     T.Resize((270, 480))
 ])
 
+surgeries = ["anterior_resection", "cholecystectomy", "colostomy", "fundoplication", "hemicolectomy", "ileostomy", "myotomy", "perineal_rectosigmoidectomy",
+                "sectionectomy", "splenectomy",  "appendectomy", "choledochoduodenostomy",  "duodenojejunostomy", "gastrectomy", "hepatectomy", "jigsaw", "pancreatectomy",
+                "proctectomy", "segmentectomy",  "UNKOWN", "cardiomytomy", "colectomy", "esophagectomy", "gastrojejunostomy", "hernia_repair", "ladds", "pancreaticojejunostomy",
+                "rectopexy", "sigmoidectomy"]
+
 class cfg:
     train_dataset = dict(
         name = "EndoVis",
@@ -30,11 +35,10 @@ class cfg:
             image_transforms = image_transform,
             gt_transforms = gt_transform,))
     validation_dataset = dict(
-        name = "EndoVis",
+        name = "OpenGenSurgery",
         args = dict(
-            root_folder = '/data/home/hao/endovis2018', 
-            split_folders = ['test'], 
-            sequence_ids = [[1,2,3,4]],
+            root_folder = '/data/home/hao/OpenGenSurgery/surgical_dataset_images', 
+            surgeries = surgeries,
             image_transforms = image_transform,
             gt_transforms = gt_transform,))
     model = dict(
