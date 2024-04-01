@@ -51,7 +51,8 @@ class SegSTRONGC(data.Dataset):
         return len(self.image_paths)
 
     def __getitem__(self, idx: int):
-        image = np.array(Image.open(self.image_paths[idx])).astype(np.float32)
+        raw_image = np.array(Image.open(self.image_paths[idx])).astype(np.float32)
+        image = raw_image.copy()
         gt = np.load(self.gt_paths[idx]).astype(np.float32)
 
         # Apply transformation to image and ground truth
@@ -74,8 +75,7 @@ class SegSTRONGC(data.Dataset):
                 image = T.ToTensor()(image)
                 gt = T.ToTensor()(gt)
 
-
-        return image, gt
+        return image, gt, raw_image
 
 if __name__ == '__main__':
     segstrong = SegSTRONGC(root_folder = '/data/home/hao/SegSTRONG-C', split = 'train', set_indices = [3,4,5,6], subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], domains = ['regular'])

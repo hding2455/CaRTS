@@ -1,16 +1,9 @@
 import numpy as np
 import torch
-import os
 import os.path as osp
-import pickle
-from typing import Tuple, List
 from torch.utils.data.dataloader import default_collate
 import torch.utils.data as data
 import torchvision.transforms as T
-import torchvision
-import random
-import cv2
-import scipy.io
 from PIL import Image
 
 count = 0
@@ -65,8 +58,6 @@ class CausalToolSeg(data.Dataset):
             image = np.array(Image.open(self.image_paths[idx+i])).astype(np.float32)
             gt = (np.array(Image.open(self.gt_paths[idx+i]))/255).astype(np.float32)
             kinematics = (self.kinematics[idx+i]).astype(np.float32)
-            
-            flag = False
 
             # Apply transformation to image and ground truth
             if self.image_transforms is not None:
@@ -92,14 +83,6 @@ class CausalToolSeg(data.Dataset):
                 kinematics = torch.tensor(kinematics)
             else:
                 kinematics = self.kinematics_transforms(kinematics)
-
-            # global count
-            # if flag:
-            #     torchvision.utils.save_image(torch.from_numpy(img_before)/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img_before.png")
-            #     torchvision.utils.save_image(torch.from_numpy(gt_before), f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt_before.png")
-            #     torchvision.utils.save_image(image.float()/255, f"/home/hao/CaRTS_benchmark_augmentation/datasets/test/{count}_img.png")
-            #     torchvision.utils.save_image(gt, f"/home/hao/CaRTS_benchmark_augmentation/datasets//test/{count}_gt.png")
-            #     count += 1
                 
             images.append(image)
             gts.append(gt)
