@@ -5,6 +5,7 @@ from .stm import STM
 from .setr import SETR_Naive, SETR_MLA, SETR_PUP
 from .deeplabv3p import DeepLabv3_plus
 from .segformer import Segformer
+from .tta import SegmentationTTAWrapper
 
 model_dict = {
     "Unet":Unet,
@@ -15,6 +16,7 @@ model_dict = {
     "SETR_PUP": SETR_PUP,
     "DeepLabv3_plus": DeepLabv3_plus,
     "Segformer": Segformer,
+    "SegmentationTTAWrapper": SegmentationTTAWrapper
 }
 
 
