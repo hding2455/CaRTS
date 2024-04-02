@@ -1,5 +1,7 @@
-from .carts import CaRTS
-from .vision import Unet, HRNet, STM, DeepLabv3_plus, Segformer, SETR_Naive, SETR_MLA, SETR_PUP, SegmentationTTAWrapper
+from .carts import *
+from .vision import *
+from .evaluation import *
+from .loss import *
 
 model_dict = {
                 "CaRTS": CaRTS,

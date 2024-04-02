@@ -16,8 +16,11 @@ class AttFeatureCosSimOptim(nn.Module):
         self.render = build_render(optim_params['render'], device)
         self.optim_params = optim_params
         self.check_NaN = check_NaN
+        bg_img = np.array(Image.open(self.optim_params['background_image'])).astype(np.float32)
+        self.bg = T.ToTensor()(bg_img).to(device=self.device) / 255
     
     def feature_sim_loss(self, load_image, render_image, attention_map):
+    #Calculate Cosine Similarity
         cos = CosineSimilarity()
         if self.feature_load is None:
             with torch.no_grad():
@@ -26,12 +29,14 @@ class AttFeatureCosSimOptim(nn.Module):
         return ((1 - cos(self.feature_load, feature_render)) * attention_map).mean()
 
     def dilation_attention_map(self, silhouette, kernel_size=5, iteration=1):
+    #Generated dilated attention_map
         kernel = np.ones((kernel_size, kernel_size))
         mask = silhouette[0,:,:,3].detach().cpu().numpy()
         dilation = cv2.dilate(mask, kernel, iterations = iteration)
         return torch.tensor(dilation)
     
     def forward(self, data):
+        #initialization for optimization
         kinematics = data['kinematics'].squeeze()
         input_kinematics = torch.zeros_like(kinematics)
         input_kinematics[:] = kinematics[:]
@@ -48,20 +53,19 @@ class AttFeatureCosSimOptim(nn.Module):
         base_params = []
         for robot in self.render.robots:
             base_params.append(robot.baseT)
-        base_optimizer = torch.optim.Adam(base_params, lr=3e-6)
         
+        #start optimization
         i = 0
         best_loss = 1
         best_pred = None
-        bg_img = np.array(Image.open(self.optim_params['background_image'])).astype(np.float32)
         self.feature_load = None
         while i < self.optim_params['iteration_num']:
+            #forward pass for calculating similarity
             optimizer.zero_grad()
             image, silhouette = self.render(input_kinematics)
-            bg = T.ToTensor()(bg_img).to(device=self.device) / 255
             mask = silhouette[: ,:, :, :].permute(0,3,1,2)[:,3,:,:]
             tool = image[:,:,:,:3].permute(0,3,1,2)
-            combine_image = bg*(1-mask) + tool*mask
+            combine_image = self.bg*(1-mask) + tool*mask
             attention_map = self.dilation_attention_map(silhouette, kernel_size=5, iteration=1).to(device=self.device)
 
             load_image = data['image']
@@ -80,6 +84,8 @@ class AttFeatureCosSimOptim(nn.Module):
                     data['optimized_camera_position'] = self.render.camera_position
                     data['optimized_camera_at'] = self.render.camera_at
                     data['optimized_camera_up'] = self.render.camera_up
+            
+            #backward for optimization
             loss.backward()
             if self.check_NaN:
                 NaN_exist = False
@@ -92,6 +98,8 @@ class AttFeatureCosSimOptim(nn.Module):
             i += 1
             optimizer.step()
             lr_scheduler.step()
+        
+        #record results
         best_pred = (best_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8) * 255
         best_pred = torch.tensor(mask_denoise(best_pred)[None,:,:] / 255.0).to(device = self.device)
         data['pred'] = best_pred

@@ -1,10 +1,6 @@
-import os
-import time
-import numpy as np
+#TODO implemente get_feature_map
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torchvision.transforms as transforms
 from .vision_base import VisionBase
 
 

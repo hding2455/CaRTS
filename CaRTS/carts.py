@@ -5,7 +5,9 @@ from .optim import build_optim_module
 class CaRTS(nn.Module):
     def __init__(self, params, device):
         super().__init__()
+        #network module as feature extractor
         self.net = build_vision_module(params['vision'], device=device)
+        #optimization module for robot optimization
         self.optim = build_optim_module(params['optim'], net=self.net, device=device)
     
     def forward(self, data):

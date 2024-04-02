@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 def mask_denoise(image):
+    #retain main connected components and remove noises
     _, CCs = cv2.connectedComponents(image, connectivity=4)
     labels = np.unique(CCs)
     for i in labels:

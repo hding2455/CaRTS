@@ -1,12 +1,18 @@
 import torch
 import torchvision.transforms as T
-import torchvision.transforms.functional as TF
-import itertools
 import torch.nn as nn
 from typing import Mapping, Union, List
-from math import prod
-from torchvision.utils import save_image
 
+#TODO remove this
+def d4_transform():
+    return Compose(
+        [
+            (T.RandomHorizontalFlip(p = 1)),
+            (T.RandomVerticalFlip(p = 1)),
+        ]
+    )
+
+#TODO remove this
 class Compose:
 
     def __init__(
@@ -22,9 +28,7 @@ class Compose:
             deaug_obj = deaug_transform
             image_aug_chain = lambda x: aug_obj(x)
             mask_deaug_chain = lambda x: deaug_obj(x)
-            label_deaug_chain = lambda x: deaug_obj(x)
-            keypoints_deaug_chain = lambda x: deaug_obj(x)
-            yield image_aug_chain, mask_deaug_chain, label_deaug_chain, keypoints_deaug_chain
+            yield image_aug_chain, mask_deaug_chain
 
     def __len__(self) -> int:
         return len(self.aug_transforms)
@@ -101,7 +105,7 @@ class SegmentationTTAWrapper(nn.Module):
         image = data['image']
         merger = Merger(type=self.merge_mode, n=len(self.transforms))
         
-        for i, (augment_image, deaugment_mask, deaugment_label, deaugment_keypoints) in enumerate(self.transforms):
+        for augment_image, deaugment_mask in (self.transforms):
             augmented_image = augment_image(image)
             augmented_image = {'image': augmented_image}
             augmented_output = self.model(augmented_image, *args)
@@ -118,10 +122,3 @@ class SegmentationTTAWrapper(nn.Module):
     def load_parameters(self, model_path):
         self.model.load_parameters(model_path)
 
-def d4_transform():
-    return Compose(
-        [
-            (T.RandomHorizontalFlip(p = 1)),
-            (T.RandomVerticalFlip(p = 1)),
-        ]
-    )

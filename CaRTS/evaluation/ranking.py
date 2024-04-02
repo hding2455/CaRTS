@@ -1,7 +1,5 @@
 import numpy as np
 from scipy import stats
-from dice_score import dice_score
-from normalized_surface_distance import normalized_surface_distance
 
 def pairwise_significance(scores_0, scores_1, threshold = 0.05):
     '''
@@ -26,7 +24,7 @@ def ranking_scores(all_preds, gts, metric):
         all_preds: list of numpy array with shape: n x w x h, 
                     the length of the list is the number of participants
         gts: numpy array with shape: n x w x h,
-        metric: str, either "dice" or "nsd"
+        metric: metric function
     return:
         scores: list of score for participants
     '''
@@ -35,14 +33,8 @@ def ranking_scores(all_preds, gts, metric):
     all_scores = []
     all_mean_scores = []
 
-    calculate_score = None
-    if metric == "dice":
-        calculate_score = dice_score
-    elif metric == "nsd":
-        calculate_score = normalized_surface_distance
-
     for preds in all_preds:
-        scores = calculate_score(preds, gts)
+        scores = metric(preds, gts)
         all_scores.append(scores)
         all_mean_scores.append(scores.mean())
     

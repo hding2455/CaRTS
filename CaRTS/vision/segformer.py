@@ -2,11 +2,9 @@ from math import sqrt
 from functools import partial
 import torch
 from torch import nn, einsum
-import torch.nn.functional as F
 from torchvision.transforms import Resize
 
-from einops import rearrange, reduce
-from einops.layers.torch import Rearrange
+from einops import rearrange
 
 from .vision_base import VisionBase
 

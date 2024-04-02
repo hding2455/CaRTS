@@ -41,7 +41,6 @@ def conv3x3(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
 
-
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -72,7 +71,6 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
 
         return out
-
 
 class Bottleneck(nn.Module):
     expansion = 4
@@ -113,7 +111,6 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
-
 
 class HighResolutionModule(nn.Module):
     def __init__(self, num_branches, blocks, num_blocks, num_inchannels,
@@ -261,12 +258,10 @@ class HighResolutionModule(nn.Module):
 
         return x_fuse
 
-
 blocks_dict = {
     'BASIC': BasicBlock,
     'BOTTLENECK': Bottleneck
 }
-
 
 class HRNet(VisionBase):
 

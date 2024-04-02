@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 from positional_encodings.torch_encodings import PositionalEncoding1D
+from .att_feature_cos_sim_optim import AttFeatureCosSimOptim
 import os
 import time
 from .utils import mask_denoise
@@ -62,7 +63,6 @@ def get_embedder(multires, i=0):
     embed = lambda x, eo=embedder_obj : eo.embed(x)
     return embed, embedder_obj.out_dim
 
-
 class Kinematic_Corrector(nn.Module):
     def __init__(self, params):
         super().__init__()
@@ -78,34 +78,14 @@ class Kinematic_Corrector(nn.Module):
         result = self.predictor(x)
         return result
 
-class TCCaRTSMLPOptim(nn.Module):
+class TCCaRTSMLPOptim(AttFeatureCosSimOptim):
     def __init__(self, optim_params, net, device, check_NaN=False):
-        super().__init__()
-        self.net = net
-        self.device = device
-        self.render = build_render(optim_params['render'], device)
-        self.optim_params = optim_params
+        super().__init__(optim_params, net, device, check_NaN)
         self.corrector = Kinematic_Corrector(optim_params['corrector']).to(device=device)
         self.positional_enc = PositionalEncoding1D(14)
-        bg_img = np.array(Image.open(self.optim_params['background_image'])).astype(np.float32)
-        self.bg = T.ToTensor()(bg_img).to(device=self.device) / 255
-        self.check_NaN = check_NaN
-
-    def feature_sim_loss(self, load_image, render_image, attention_map):
-        cos = CosineSimilarity()
-        if self.feature_load is None:
-            with torch.no_grad():
-                self.feature_load = self.net.get_feature_map(dict(image = load_image))
-        feature_render = self.net.get_feature_map(dict(image = render_image))
-        return ((1 - cos(self.feature_load, feature_render)) * attention_map).mean()
-
-    def dilation_attention_map(self, silhouette, kernel_size=5, iteration=1):
-        kernel = np.ones((kernel_size, kernel_size))
-        mask = silhouette[0,:,:,3].detach().cpu().numpy()
-        dilation = cv2.dilate(mask, kernel, iterations = iteration)
-        return torch.tensor(dilation)
 
     def forward(self, data):
+        #initialization for optimization
         self.feature_load = None
         shape_len = len(data['kinematics'].shape)
         if shape_len == 3:
@@ -128,7 +108,6 @@ class TCCaRTSMLPOptim(nn.Module):
         base_optimizer = torch.optim.Adam(base_params, lr=1e-6)
         
         i = 0
-
         with torch.no_grad():
             image, silhouette = self.render(initial_kinematics)
             data['pure_render'] = silhouette[:,:,:, 3]
@@ -147,7 +126,10 @@ class TCCaRTSMLPOptim(nn.Module):
         best_loss = loss.item()
         best_pred = silhouette[:,:,:, 3] 
         iteration_num = self.optim_params['iteration_num']
+
+        #start optimization
         while i < iteration_num:
+            #forward pass for calculating similarity
             optimizer.zero_grad() 
             base_optimizer.zero_grad()
             if shape_len == 3:
@@ -183,6 +165,8 @@ class TCCaRTSMLPOptim(nn.Module):
             if data['iteration'] > 0:
                 #regularization 2: temporal smooth 
                 loss += 1 * ((input_kinematics - self.last_input_kinematics) ** 2).mean()
+            
+            #backward for optimization
             loss.backward()
             if self.check_NaN:
                 NaN_exist = False
@@ -197,6 +181,8 @@ class TCCaRTSMLPOptim(nn.Module):
             lr_scheduler.step()
         #hand-eye optimization    
         base_optimizer.step()
+
+        #record results
         self.last_input_kinematics = input_kinematics.data
         best_pred = (best_pred.squeeze().detach().cpu().numpy() > 0.5).astype(np.uint8) * 255
         best_pred = torch.tensor(mask_denoise(best_pred)[None,:,:] / 255.0).to(device = self.device)

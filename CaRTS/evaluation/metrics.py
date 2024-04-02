@@ -1,7 +1,25 @@
 import numpy as np
 from scipy.ndimage import binary_dilation
 
-def normalized_surface_distance(preds, gts, tau):
+def dice_scores(preds, gts):
+    '''
+    Caculate dice scores of tool for each image.
+    attributes:
+        preds: numpy array with shape: n x w x h,
+        gts: numpy array with shape: n x w x h,
+                n: number of images, w: width of the image, h: height of the image
+                1 for prediction of tool, 0 for prediction of background
+    return:
+        dice_scores: numpy array with shape n.
+    '''
+    smooth = 1e-10
+    tool_mask = preds >= 0.5
+    num = 2 * (tool_mask * gts).sum(axis = (1,2)) + smooth
+    denom = (gts.sum(axis = (1,2)) + tool_mask.sum(axis = (1,2))) + smooth
+    dice_scores =  num / denom 
+    return dice_scores
+
+def normalized_surface_distances(preds, gts, tau):
     '''
     Calculate the normalized surface distance for each image
     attributes:
@@ -43,3 +61,4 @@ def normalized_surface_distance(preds, gts, tau):
     nsd = (intersect_gts_in_preds + intersect_preds_in_gts) / float(np.sum(boundary_gts) + np.sum(boundary_preds))
 
     return nsd
+    

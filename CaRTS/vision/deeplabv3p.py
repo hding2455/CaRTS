@@ -224,6 +224,7 @@ class DeepLabv3_plus(VisionBase):
                                        nn.BatchNorm2d(256),
                                        nn.ReLU(),
                                        nn.Conv2d(256, 1, kernel_size=1, stride=1))
+        self.__init_weight()
         self.to(device = device)
     
     def get_feature_map(self, x):
@@ -251,7 +252,6 @@ class DeepLabv3_plus(VisionBase):
 
         x = torch.cat((x, low_level_features), dim=1)
         return x
-
 
     def forward(self, x, return_loss = False):
         feature_map = self.get_feature_map(x)
