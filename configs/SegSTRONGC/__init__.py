@@ -1,2 +1,2 @@
-from .Networks import UNet_SegSTRONGC
-from .Augmentation import UNet_SegSTRONGC_Projective
+from .Networks import UNet_SegSTRONGC, SETR_Naive_SegSTRONGC, SETR_MLA_SegSTRONGC, SETR_PUP_SegSTRONGC, DeepLabV3p_SegSTRONGC, Segformer_SegSTRONGC
+from .Augmentation import UNet_SegSTRONGC_Projective, UNet_SegSTRONGC_AutoAugment

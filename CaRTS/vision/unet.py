@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from .vision_base import VisionBase
+import numpy as np
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
@@ -120,6 +121,8 @@ class Unet(VisionBase):
         result = self.outc(feature_map)
         if return_loss:
             gt = x['gt']
+            np.save("gt.npy", gt.cpu().detach().numpy())
+            np.save("result.npy", result.sigmoid().cpu().detach().numpy())
             loss = self.criterion(result.sigmoid(), gt)
             return result, loss
         else:

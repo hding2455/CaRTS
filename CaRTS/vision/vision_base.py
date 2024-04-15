@@ -48,7 +48,7 @@ class VisionBase(nn.Module):
             self.train()
             running_loss = 0
             start = time.time()
-            for i, (image, gt, _) in enumerate(train_dataloader):
+            for i, (image, gt) in enumerate(train_dataloader):
                 self.zero_grad()
                 data = {}
                 if perturbation is not None:
@@ -77,7 +77,7 @@ class VisionBase(nn.Module):
                 self.eval()
                 validation_loss = 0
                 start = time.time()
-                for i, (image, gt, kinematics) in enumerate(validation_dataloader):
+                for i, (image, gt) in enumerate(validation_dataloader):
                    data['image'] = image.to(device=device)
                    data['gt'] = gt.to(device=device)
                    pred, loss = self.forward(data, return_loss=True)

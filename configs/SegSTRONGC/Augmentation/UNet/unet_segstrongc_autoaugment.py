@@ -4,8 +4,10 @@ from torch.optim.lr_scheduler import StepLR
 from torch.nn import BCELoss
 from torch.optim.lr_scheduler import StepLR
 import numpy as np
+import torch
 from datasets import SmokeNoise
 import torchvision.transforms as T
+from datasets.transformation.autoaugment import AutoAugment
 
 transform = T.Compose([
     T.ToTensor(),
@@ -21,8 +23,8 @@ class cfg:
             set_indices = [3,4,5,7,8], 
             subset_indices = [[0,2], [0,1,2], [0,2], [0,1], [1,2]], 
             domains = ['regular'],
-            image_transforms = [transform],
-            gt_transforms = [True],))
+            image_transforms = [transform, lambda x : x.to(torch.uint8), AutoAugment, lambda x : x.to(torch.float)],
+            gt_transforms = [True, False, False, False],))
     validation_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
@@ -66,5 +68,5 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=40,
                         save_interval=5,
-                        save_path='/workspace/code/checkpoints/unet_segstrongc/',
+                        save_path='/workspace/code/checkpoints/unet_segstrongc_autoaugment/',
                         log_interval=50)))

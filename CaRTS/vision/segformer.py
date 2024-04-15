@@ -187,13 +187,13 @@ class Segformer(VisionBase):
         self.to_segmentation = nn.Sequential(
             nn.Conv2d(4 * self.decoder_dim, self.decoder_dim, 1),
             nn.Conv2d(self.decoder_dim, self.num_classes, 1),
+            nn.Upsample(scale_factor=4)
         )
 
         self.to(device = device)
 
     def get_feature_map(self, x):
         image = x['image']
-        image = Resize((352, 480))(image)
         layer_outputs = self.mit(image, return_layer_outputs = True)
 
         fused = [to_fused(output) for output, to_fused in zip(layer_outputs, self.to_fused)]
@@ -203,7 +203,6 @@ class Segformer(VisionBase):
     def forward(self, x, return_loss=False):
         feature_map = self.get_feature_map(x)
         result = self.to_segmentation(feature_map)
-        result = Resize((360, 480))(result)
         if return_loss:
             gt = x['gt']
             loss = self.criterion(result.sigmoid(), gt)

@@ -1,6 +1,6 @@
-#TODO implemente get_feature_map
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from .vision_base import VisionBase
 
 
@@ -174,7 +174,7 @@ class LearnedPositionalEncoding(nn.Module):
         position_embeddings = self.pe(position_ids)
         return x + position_embeddings
 
-class SegmentationTransformer(nn.Module):
+class SegmentationTransformer(VisionBase):
     def __init__(self, params, device):
         super(SegmentationTransformer, self).__init__(params, device)
 
@@ -191,6 +191,7 @@ class SegmentationTransformer(nn.Module):
         self.hidden_dim = params['hidden_dim']
         self.criterion = params['criterion']
         self.aux_layers = params.get('aux_layers', None)
+        self.out = None
 
         assert self.embedding_dim % self.num_heads == 0
         assert self.img_dim[0] % self.patch_dim == 0
@@ -269,13 +270,19 @@ class SegmentationTransformer(nn.Module):
 
     def decode(self, x):
         raise NotImplementedError("Should be implemented in child class!!")
-
-    def forward(self, x, auxillary_output_layers=None, return_loss=False):
+    
+    def get_feature_map(self, x, auxillary_output_layers):
         encoder_output, intmd_encoder_outputs = self.encode(x['image'])
         auxillary_output_layers = self.aux_layers
-        decoder_output = self.decode(
+        feature_map = self.decode(
             encoder_output, intmd_encoder_outputs, auxillary_output_layers
         )
+        return feature_map, intmd_encoder_outputs
+        
+    
+    def forward(self, x, auxillary_output_layers=None, return_loss=False):
+        feature_map, intmd_encoder_outputs = self.get_feature_map(x, auxillary_output_layers)
+        result = self.out(feature_map)
 
         if auxillary_output_layers is not None:
             auxillary_outputs = {}
@@ -286,10 +293,10 @@ class SegmentationTransformer(nn.Module):
         
         if return_loss:
             gt = x['gt']
-            loss = self.criterion(decoder_output.sigmoid(), gt)
-            return decoder_output, loss
+            loss = self.criterion(result.sigmoid(), gt)
+            return result, loss
         else:
-            x['pred'] = decoder_output.sigmoid()
+            x['pred'] = result.sigmoid()
             return x
 
     def _get_padding(self, padding_type, kernel_size):
@@ -309,10 +316,9 @@ class SegmentationTransformer(nn.Module):
         x = x.permute(0, 3, 1, 2).contiguous()
         return x
 
-class SETR_Naive(SegmentationTransformer, VisionBase):
+class SETR_Naive(SegmentationTransformer):
     def __init__(self, params, device):
 
-        VisionBase.__init__(self, params, device)
         SegmentationTransformer.__init__(self, params, device)
         
 
@@ -331,15 +337,23 @@ class SETR_Naive(SegmentationTransformer, VisionBase):
         )
         self.bn1 = nn.BatchNorm2d(self.embedding_dim)
         self.act1 = nn.ReLU()
-        self.conv2 = nn.Conv2d(
-            in_channels=self.embedding_dim,
-            out_channels=self.num_classes,
-            kernel_size=1,
-            stride=1,
-            padding=self._get_padding('VALID', (1, 1),),
-        )
-        self.upsample = nn.Upsample(
-            scale_factor=self.patch_dim, mode='bilinear'
+        
+        self.out = IntermediateSequential(return_intermediate=False)
+        self.out.add_module(
+            "Conv2d",
+            nn.Conv2d(
+                in_channels=self.embedding_dim,
+                out_channels=self.num_classes,
+                kernel_size=1,
+                stride=1,
+                padding=self._get_padding('VALID', (1, 1),),
+            )
+        ) 
+        self.out.add_module(
+            "Upsample",
+            nn.Upsample(
+                scale_factor=self.patch_dim, mode='bilinear'
+            )
         )
 
     def decode(self, x, intmd_x, intmd_layers=None):
@@ -347,13 +361,10 @@ class SETR_Naive(SegmentationTransformer, VisionBase):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.act1(x)
-        x = self.conv2(x)
-        x = self.upsample(x)
         return x
 
-class SETR_MLA(SegmentationTransformer, VisionBase):
+class SETR_MLA(SegmentationTransformer,):
     def __init__(self, params, device):
-        VisionBase.__init__(self, params, device)
         SegmentationTransformer.__init__(self, params, device)
 
         self.num_classes = params['num_classes']
@@ -368,8 +379,8 @@ class SETR_MLA(SegmentationTransformer, VisionBase):
         self.net4_in, self.net4_intmd, self.net4_out = self._define_agg_net()
 
         # fmt: off
-        self.output_net = IntermediateSequential(return_intermediate=False)
-        self.output_net.add_module(
+        self.out = IntermediateSequential(return_intermediate=False)
+        self.out.add_module(
             "conv_1",
             nn.Conv2d(
                 in_channels=self.embedding_dim, out_channels=self.num_classes,
@@ -377,9 +388,9 @@ class SETR_MLA(SegmentationTransformer, VisionBase):
                 padding=self._get_padding('VALID', (1, 1),),
             )
         )
-        self.output_net.add_module(
+        self.out.add_module(
             "upsample_1",
-            nn.Upsample(scale_factor=3.75, mode='bilinear')
+            nn.Upsample(scale_factor=4, mode='bilinear')
         )
         # fmt: on
 
@@ -422,7 +433,6 @@ class SETR_MLA(SegmentationTransformer, VisionBase):
         key3_out = self.net4_out(key3_intmd_out)
 
         out = torch.cat((key0_out, key1_out, key2_out, key3_out), dim=1)
-        out = self.output_net(out)
         return out
 
     # fmt: off
@@ -466,9 +476,8 @@ class SETR_MLA(SegmentationTransformer, VisionBase):
         return model_in, model_intmd, model_out
     # fmt: on
 
-class SETR_PUP(SegmentationTransformer, VisionBase):
+class SETR_PUP(SegmentationTransformer):
     def __init__(self, params, device):
-        VisionBase.__init__(self, params, device)
         SegmentationTransformer.__init__(self, params, device)
 
         self.num_classes = params['num_classes']
@@ -506,10 +515,17 @@ class SETR_PUP(SegmentationTransformer, VisionBase):
                     padding=self._get_padding('VALID', (1, 1),),
                 )
             )
-            if i != 3 and i != 4:
+            if i != 4:
                 modules.append(nn.Upsample(scale_factor=2, mode='bilinear'))
+
+        decode_modules = modules[:-1]
         self.decode_net = IntermediateSequential(
-            *modules, return_intermediate=False
+            *decode_modules, return_intermediate=False
+        )
+
+        out = modules[-1:]
+        self.out = IntermediateSequential(
+            *out, return_intermediate=False
         )
 
     def decode(self, x, intmd_x, intmd_layers=None):

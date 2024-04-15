@@ -75,7 +75,8 @@ class SegSTRONGC(data.Dataset):
                 image = T.ToTensor()(image)
                 gt = T.ToTensor()(gt)
 
-        return image, gt, raw_image
+        # return image, gt, raw_image
+        return image, gt
 
 if __name__ == '__main__':
     segstrong = SegSTRONGC(root_folder = '/data/home/hao/SegSTRONG-C', split = 'train', set_indices = [3,4,5,6], subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], domains = ['regular'])

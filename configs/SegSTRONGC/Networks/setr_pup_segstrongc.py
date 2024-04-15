@@ -9,7 +9,7 @@ import torchvision.transforms as T
 
 transform = T.Compose([
     T.ToTensor(),
-    T.Resize((270, 480))
+    T.Resize((272, 480))
 ])
 
 class cfg:
@@ -33,24 +33,23 @@ class cfg:
             domains = ['regular'],
             image_transforms = [transform],
             gt_transforms = [True],))
-    test_dataset = dict(
-        name = "SegSTRONGC",
-        args = dict(
-            root_folder = '/workspace/data/SegSTRONG-C', 
-            split = 'test', 
-            set_indices = [9], 
-            subset_indices = [[0,1,2]], 
-            domains = ['regular'],
-            image_transforms = [transform],
-            gt_transforms = [True],))
     model = dict(
-                name = "Unet",
+                name = "SETR_PUP",
                 params = dict(
-                    input_dim = 3,
-                    hidden_dims = [512, 256, 128, 64, 32],
-                    size = (15, 20),
-                    target_size = (270, 480),
+                    img_dim = (272, 480),
+                    patch_dim = 16,
+                    num_channels = 3,
+                    num_classes = 1,
+                    embedding_dim = 768,
+                    num_heads = 12,
+                    num_layers = 12,
+                    hidden_dim = 3072,
+                    dropout_rate = 0.1,
+                    attn_dropout_rate = 0.1,
+                    conv_patch_representation = False,
+                    positional_encoding_type = "learned",
                     criterion = BCELoss(),
+                    aux_layers = [3, 6, 9, 12],
                     train_params = dict(
                         perturbation = None,
                         lr_scheduler = dict(
@@ -61,10 +60,9 @@ class cfg:
                         optimizer = dict(
                             optim_class = SGD,
                             args = dict(
-                                lr = 0.01,
-                                momentum = 0.9,
+                                lr = 1e-3,
                                 weight_decay = 10e-5)),
                         max_epoch_number=40,
-                        save_interval=5,
-                        save_path='/workspace/code/checkpoints/unet_segstrongc/',
+                        save_interval=2,
+                        save_path='/workspace/code/checkpoints/setr_pup_segstrongc/',
                         log_interval=50)))
