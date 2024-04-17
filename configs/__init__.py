@@ -30,6 +30,7 @@ config_dict = {
         "UNet_OPENGENSURGERY": UNet_OPENGENSURGERY,
         "UNet_SegSTRONGC_AutoAugment": UNet_SegSTRONGC_AutoAugment,
         "UNet_SegSTRONGC_Projective": UNet_SegSTRONGC_Projective,
+        "UNet_SegSTRONGC_Elastic": UNet_SegSTRONGC_Elastic,
         "DeepLabV3p_SegSTRONGC": DeepLabV3p_SegSTRONGC,
         "TTA_Unet_CTS": TTA_Unet_CTS,
         }

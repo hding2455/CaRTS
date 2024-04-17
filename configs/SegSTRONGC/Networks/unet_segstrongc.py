@@ -1,10 +1,6 @@
 from torch.optim import  SGD
 from torch.nn import BCELoss
 from torch.optim.lr_scheduler import StepLR
-from torch.nn import BCELoss
-from torch.optim.lr_scheduler import StepLR
-import numpy as np
-from datasets import SmokeNoise
 import torchvision.transforms as T
 
 transform = T.Compose([
