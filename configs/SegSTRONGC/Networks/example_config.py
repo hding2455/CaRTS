@@ -5,7 +5,7 @@ import torchvision.transforms as T
 
 transform = T.Compose([
     T.ToTensor(),
-    T.Resize((256, 480))
+    T.Resize((270, 480))
 ])
 
 class cfg:
@@ -40,16 +40,8 @@ class cfg:
             image_transforms = [transform],
             gt_transforms = [True],))
     model = dict(
-                name = "Segformer",
+                name = "YOUR_MODEL_NAME",
                 params = dict(
-                    dims = (32, 64, 160, 256),
-                    heads = (1, 2, 5, 8),
-                    ff_expansion = (8, 8, 4, 4),
-                    reduction_ratio = (8, 4, 2, 1),
-                    num_layers = 2,
-                    channels = 3,
-                    decoder_dim = 256,
-                    num_classes = 1,
                     criterion = BCELoss(),
                     train_params = dict(
                         perturbation = None,
@@ -61,10 +53,10 @@ class cfg:
                         optimizer = dict(
                             optim_class = SGD,
                             args = dict(
-                                lr = 0.001,
+                                lr = 0.01,
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
                         max_epoch_number=40,
                         save_interval=5,
-                        save_path='/workspace/code/checkpoints/segformer_segstrongc/',
+                        save_path='/workspace/code/checkpoints/YOUR_MODEL_NAME/',
                         log_interval=50)))
