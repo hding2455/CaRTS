@@ -29,6 +29,16 @@ class cfg:
             domains = ['regular'],
             image_transforms = [transform],
             gt_transforms = [True],))
+    test_dataset = dict(
+        name = "SegSTRONGC",
+        args = dict(
+            root_folder = '/workspace/data/SegSTRONG-C', 
+            split = 'test', 
+            set_indices = [9], 
+            subset_indices = [[0,1,2]], 
+            domains = ['regular'],
+            image_transforms = [transform],
+            gt_transforms = [True],))
     model = dict(
                 name = "SETR_Naive",
                 params = dict(

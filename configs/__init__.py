@@ -31,6 +31,9 @@ config_dict = {
         "UNet_SegSTRONGC_AutoAugment": UNet_SegSTRONGC_AutoAugment,
         "UNet_SegSTRONGC_Projective": UNet_SegSTRONGC_Projective,
         "UNet_SegSTRONGC_Elastic": UNet_SegSTRONGC_Elastic,
+        "SETR_MLA_SegSTRONGC_AutoAugment": SETR_MLA_SegSTRONGC_AutoAugment,
+        "SETR_MLA_SegSTRONGC_Projective": SETR_MLA_SegSTRONGC_Projective,
+        "SETR_MLA_SegSTRONGC_Elastic": SETR_MLA_SegSTRONGC_Elastic,
         "DeepLabV3p_SegSTRONGC": DeepLabV3p_SegSTRONGC,
         "TTA_Unet_CTS": TTA_Unet_CTS,
         }

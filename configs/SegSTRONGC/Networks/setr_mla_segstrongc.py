@@ -38,8 +38,8 @@ class cfg:
         args = dict(
             root_folder = '/workspace/data/SegSTRONG-C', 
             split = 'test', 
-            set_indices = [2,9], 
-            subset_indices = [[0,2], [0,1,2]], 
+            set_indices = [9], 
+            subset_indices = [[0,1,2]], 
             domains = ['regular'],
             image_transforms = [transform],
             gt_transforms = [True],))
