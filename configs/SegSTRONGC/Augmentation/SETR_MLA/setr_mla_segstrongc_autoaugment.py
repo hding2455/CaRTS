@@ -72,7 +72,7 @@ class cfg:
                         optimizer = dict(
                             optim_class = SGD,
                             args = dict(
-                                lr = 1e-4,
+                                lr = 1e-5,
                                 weight_decay = 10e-5)),
                         max_epoch_number=40,
                         save_interval=5,

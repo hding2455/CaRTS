@@ -76,5 +76,5 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=40,
                         save_interval=5,
-                        save_path='/workspace/code/checkpoints/setr_mla_segstrongc_autoaugment/',
+                        save_path='/workspace/code/checkpoints/setr_mla_segstrongc_projective/',
                         log_interval=50)))
