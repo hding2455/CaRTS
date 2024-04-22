@@ -106,6 +106,7 @@ class ElasticTransform(torch.nn.Module):
 
         Returns:
             PIL Image or Tensor: Transformed image.
+            List of transformnation: Transformations applied to the ground truth
         """
         gt_transforms = []
         _, height, width = F.get_dimensions(tensor)

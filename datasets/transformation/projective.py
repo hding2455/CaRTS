@@ -50,6 +50,7 @@ class RandomPerspective(torch.nn.Module):
 
         Returns:
             PIL Image or Tensor: Randomly transformed image.
+            List of transformnation: Transformations applied to the ground truth
         """
 
         gt_transforms = []

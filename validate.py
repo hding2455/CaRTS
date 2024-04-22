@@ -14,18 +14,20 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str)
-    parser.add_argument("--model_path", type=str)
-    parser.add_argument("--test", type=bool, default=False)
-    parser.add_argument("--domain", type=str, default=None)
-    parser.add_argument("--tau", type=int, default=5)
+    parser = argparse.ArgumentParser(epilog="Example of usage:\n python validate.py --config UNet_SegSTRONGC --model_path checkpoints/unet_segstrongc/model_39.pth --test True --domain regular")
+    parser.add_argument("--config", type=str, help="Name of the config file")
+    parser.add_argument("--model_path", type=str, help="Path of the model checkpoint file")
+    parser.add_argument("--test", type=bool, default=False, help="True for testing, False for validation")
+    parser.add_argument("--domain", type=str, default=None, choices=['regular', 'smoke', 'bg_change', 'bleeding', 'low_brightness'], help="Test/Validate domain")
+    parser.add_argument("--save_dir", type=str, default=None, help="Path to save model output")
+    parser.add_argument("--tau", type=int, default=5, help="Tolerance in normalized surface distance calculation")
     args = parser.parse_args()
     return args
 
 def evaluate(model, dataloader, device, tau, save_dir=None):
     start = time.time()
     results = []
+    gts = []
     dice_tools = []
     nsds = []
     model.eval()
@@ -35,11 +37,8 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
             os.makedirs(save_dir)
     
     for i, (image, gt) in enumerate(dataloader):
-        if i == 10:
-            break
 
         print("Iteration: ", i, "/", len(dataloader), end="\r")
-
 
         data = dict()
         data['image'] = image.to(device=device)
@@ -49,14 +48,13 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         
         result = np.where(pred[0].cpu().detach().numpy()>0.5, 1, 0)
         results.append(result)
-        
+
         if save_dir is not None:
-            dice_tool = dice_scores(pred, data['gt'])
-            nsd = normalized_surface_distances(pred, data['gt'], tau)
+            dice_tool = dice_scores((pred > 0.5).squeeze(), data['gt'])
+            nsd = normalized_surface_distances((pred > 0.5).squeeze(), data['gt'], tau)
             dice_tools.append(dice_tool)
             nsds.append(nsd)
         
-    plt.imsave("img.png", results[1][0], cmap=cm.gray)
     elapsed = time.time() - start
     print("iteration per Sec: %f" %
         ((i+1) / elapsed))
@@ -71,8 +69,6 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
             (np.mean([nsds])))
         print("std: nsd: %f" %
             (np.std([nsds])))
-        
-    a = np.load(os.path.join(save_dir, "pred.npy"))
     
 
 if __name__ == "__main__":
@@ -96,12 +92,11 @@ if __name__ == "__main__":
             
     dataset = None
     datatloader = None
-    save_dir = None
+    save_dir = args.save_dir
 
     if args.test:
         dataset = dataset_dict[cfg.test_dataset['name']](**(cfg.test_dataset['args']))
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
-        save_dir = os.path.join(os.getcwd(), "results", args.domain, cfg.model['name'])
     else:
         dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)

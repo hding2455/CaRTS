@@ -15,7 +15,7 @@ class SegSTRONGC(data.Dataset):
             split: 'train', 'val' or 'test'
             domain: the image domains to be loaded.
             image_transforms: any transforms to perform, can add augmentations here.
-            gt_transforms: corresponding transform for gt.
+            gt_transforms: list of bool. Indicates whether image_transforms should also be appleid to gt. 
         '''
         self.split = split
         self.root_folder = root_folder
@@ -58,9 +58,10 @@ class SegSTRONGC(data.Dataset):
         # Apply transformation to image and ground truth
         if self.image_transforms is not None:
             for i, image_transform in enumerate(self.image_transforms):
+                
+                output = image_transform(image)
 
                 # Apply the same image transformation to gt
-                output = image_transform(image)
                 if self.gt_transforms[i]:
                     gt = image_transform(gt)
 

@@ -265,6 +265,7 @@ class AutoAugmentModel(torch.nn.Module):
 
         Returns:
             PIL Image or Tensor: AutoAugmented image.
+            List of transformnation: Transformations applied to the ground truth
         """
         fill = self.fill
         channels, height, width = F.get_dimensions(img)
