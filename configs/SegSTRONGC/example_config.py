@@ -8,7 +8,19 @@ transform = T.Compose([
     T.Resize((270, 480))
 ])
 
+
 class cfg:
+    '''Example configuration file for training, validation and testing
+    
+    Attributes:
+        train_dataset: Training dataset parameters. image_transforms is a list of transformations you want to apply to training images. 
+            gt_transforms is a list of boolean variables of the same length as image_transforms. It denotes whether 
+            the ground truth images should undergo the same transformation as training images. For example, when you need to resize the 
+            training images, you can set image_transforms = [T.resize((a,b))] and gt_transforms = [True].
+        validation_dataset: Validation dataset parameters.
+        test_dataset: Testing dataset parameters.
+        model: Model and training scheme parameters.
+    '''
     train_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
@@ -42,6 +54,8 @@ class cfg:
     model = dict(
                 name = "YOUR_MODEL_NAME",
                 params = dict(
+                    ## TODO: add parameters for your model
+
                     criterion = BCELoss(),
                     train_params = dict(
                         perturbation = None,

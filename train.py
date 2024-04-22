@@ -10,8 +10,8 @@ from CaRTS import build_model
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str)
-    parser.add_argument("--model_path", type=str, default=None)
+    parser.add_argument("--config", type=str, help="Name of the configuration file.")
+    parser.add_argument("--model_path", type=str, default=None, help="Path to the model checkpoint file")
     args = parser.parse_args()
     return args
 

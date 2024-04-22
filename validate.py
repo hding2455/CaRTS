@@ -16,7 +16,7 @@ import matplotlib.cm as cm
 def parse_args():
     parser = argparse.ArgumentParser(epilog="Example of usage:\n python validate.py --config UNet_SegSTRONGC --model_path checkpoints/unet_segstrongc/model_39.pth --test True --domain regular")
     parser.add_argument("--config", type=str, help="Name of the config file")
-    parser.add_argument("--model_path", type=str, help="Path of the model checkpoint file")
+    parser.add_argument("--model_path", type=str, help="Path to the model checkpoint file")
     parser.add_argument("--test", type=bool, default=False, help="True for testing, False for validation")
     parser.add_argument("--domain", type=str, default=None, choices=['regular', 'smoke', 'bg_change', 'bleeding', 'low_brightness'], help="Test/Validate domain")
     parser.add_argument("--save_dir", type=str, default=None, help="Path to save model output")
