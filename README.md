@@ -1,6 +1,10 @@
-# CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data
-This repo hosts the code for implementing the CaRTS algorithms for Robot Tool segmentation.
+# SegSTRONG-C: Segmenting Surgical Tools Robustly On Non-adversarial Generated Corruptions
 
+This repo hosts the code for implementing the baseline algorithms for SegSTRONG-C.
+
+![eye_candy](img/eye_candy_2.jpeg)
+
+This challenge is originated from:
 > [**CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data**](https://link.springer.com/chapter/10.1007/978-3-031-16449-1_37),            
 > Hao Ding, Jintan Zhang, Peter Kazanzides, Jie Ying Wu, Mathias Unberath 
 > Proc. MICCAI, 2022  
@@ -11,63 +15,38 @@ This repo hosts the code for implementing the CaRTS algorithms for Robot Tool se
 > Int J CARS 18, 1009–1016 (2023)
 > *arXiv preprint ([arXiv 2203.09475](https://arxiv.org/abs/2212.00072))*
 
-![eye_candy](img/eye_candy.jpeg)
-
-![causal_model](img/causal_model.jpeg)
-
-![CaRTS](img/CaRTS.jpeg)
-
-![tc_causal_model](img/tc_carts_causal.jpg)
-
-![CaRTS](img/tc_carts.jpg)
-
-## Highlights
-- **Complementary Causal Model for Robot Tool Segmentation**  
-- **Architecture CaRTS, based on the causal model** 
-
 ## Installation
 
+### We provided docker for easy installation, the environment can be easily set up via:
 
-### We created an environment.yml for creating the exact same conda envrionment that we ran the code on,You can simply install the environment by this conda command:
-
-    conda env create -f environment.yml
-
-### Our CUDA VERSION is:
-    
-    Cuda compilation tools, release 12.2, V12.2.128
-
-### Our GPU DRIVER VERSION is:
-
-    535.104.05
+    cd docker
+    docker build ./ -t segstrongc:latest
+    docker run --rm -v "LOCAL_DATADIR":/workspace/data --gpus='"device={GPU_IDS}"' -it segstrongc:latest
 
 
 ## Usage
 
 We only used one GPU for training and inference so we haven't implement multi-gpu version.
 
-### To run training, find the right name for the config you want in the ![file](config/__init__.py):
+### To run training, find the right name for the config you want in the [file](config/__init__.py):
 
-python train_nn.py <config_name>
+    python train.py --config CONFIG_FILENAME
 
 ### for example:
 
-python train.py CaRTS_CTS
+    python train.py --config UNet_SegSTRONGC
 
 ### To run inference, give the name of the config and the path to the checkpoint file for networks to load:
 
-python test.py <config_name> <path_to_checkpoint> <test_domain>
+    python validate.py --config CONFIG_FILENAME --model_path CHECKPOINT_PATH --test TEST --domain DOMAIN_NAME
 
 ### for example:
 
-python test.py CaRTS_CTS ./checkpoints/carts/model_49.pth regular
+    python validate.py --config UNet_SegSTRONGC --model_path checkpoints/unet_segstrongc/model_39.pth --test True --domain regular
 
 ## Dataset preparation:
 
-We are working on make a more comprehensive version of the causal tool segmentation dataset. If you need the dataset that is used in this paper, please contact Hao Ding ([email](mailto:hding15@jhu.edu)) and Mathias Unberath([email](mailto:unberath@jhu.edu)）.
-
-If you want to use your own dataset please write your own dataloader with the same format that as the files in the dataset folder.
-
-
+Please refer to our ([website](segstrongc.cs.jhu.edu)) for registration and data downloading
 
 ## Citations
 Please consider citing our papers in your publications if this repo helps you. 
