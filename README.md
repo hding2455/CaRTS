@@ -2,7 +2,7 @@
 
 This repo hosts the code for implementing the baseline algorithms for SegSTRONG-C.
 
-![eye_candy](img/eye_candy_2.jpeg)
+![eye_candy](img/eye_candy_2.png)
 
 This challenge is originated from:
 > [**CaRTS: Causality-driven Robot Tool Segmentation from Vision and Kinematics Data**](https://link.springer.com/chapter/10.1007/978-3-031-16449-1_37),            
