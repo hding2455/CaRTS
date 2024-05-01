@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import binary_dilation
 from . import surface_distance
 
-def dice_scores(preds, gts):
+def dice_scores(preds, gts, smooth = 1e-10):
     '''
     Caculate dice scores of tool for each image.
     attributes:
@@ -13,14 +13,15 @@ def dice_scores(preds, gts):
     return:
         dice_scores: numpy array with shape n.
     '''
+    #preds = preds.detach().cpu().numpy()
+    #gts = gts.detach().cpu().numpy()
 
-    preds = preds.detach().cpu().numpy()
-    gts = gts.detach().cpu().numpy()
+    # tool_mask = preds >= 0.5
+    # num = 2 * (tool_mask * gts).sum(axis = (1,2)) + smooth
+    # denom = (gts.sum(axis = (1,2)) + tool_mask.sum(axis = (1,2))) + smooth
 
-    smooth = 1e-10
-    tool_mask = preds >= 0.5
-    num = 2 * (tool_mask * gts).sum(axis = (1,2)) + smooth
-    denom = (gts.sum(axis = (1,2)) + tool_mask.sum(axis = (1,2))) + smooth
+    num = 2 * (preds * gts).sum() + smooth
+    denom = (gts.sum() + preds.sum()) + smooth
     dice_scores =  num / denom 
     return dice_scores
 
@@ -37,9 +38,9 @@ def normalized_surface_distances(preds, gts, tau):
         nsd: numpy array with shape n.
     '''
     
-    preds = preds.detach().cpu().numpy().squeeze().astype(bool)
-    gts = gts.detach().cpu().numpy().squeeze().astype(bool)
+    #preds = preds.detach().cpu().numpy().squeeze().astype(bool)
+    #gts = gts.detach().cpu().numpy().squeeze().astype(bool)
 
 
     surface_distances = surface_distance.compute_surface_distances(gts, preds, [1,1])
-    return surface_distance.compute_surface_overlap_at_tolerance(surface_distances, tau)
+    return surface_distance.compute_surface_dice_at_tolerance(surface_distances, tau)

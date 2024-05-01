@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument("--config", type=str, help="Name of the config file")
     parser.add_argument("--model_path", type=str, help="Path to the model checkpoint file")
     parser.add_argument("--test", type=bool, default=False, help="True for testing, False for validation")
-    parser.add_argument("--domain", type=str, default=None, choices=['regular', 'smoke', 'bg_change', 'bleeding', 'low_brightness'], help="Test/Validate domain")
+    parser.add_argument("--domain", type=str, default=None, choices=['regular', 'smoke', 'bg_change', 'blood', 'low_brightness'], help="Test/Validate domain")
     parser.add_argument("--save_dir", type=str, default=None, help="Path to save model output")
     parser.add_argument("--tau", type=int, default=5, help="Tolerance in normalized surface distance calculation")
     args = parser.parse_args()
@@ -50,6 +50,7 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         results.append(result)
 
         if save_dir is not None:
+            print(pred.shape, data['gt'].shape)
             dice_tool = dice_scores((pred > 0.5).squeeze(), data['gt'])
             nsd = normalized_surface_distances((pred > 0.5).squeeze(), data['gt'], tau)
             dice_tools.append(dice_tool)

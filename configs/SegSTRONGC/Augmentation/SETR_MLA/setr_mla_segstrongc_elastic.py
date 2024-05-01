@@ -11,7 +11,7 @@ from datasets.transformation.elastic import Elastic
 
 transform = T.Compose([
     T.ToTensor(),
-    T.Resize((272, 480))
+    T.Resize((270, 480), interpolation = T.InterpolationMode.NEAREST)
 ])
 
 class cfg:

@@ -9,7 +9,7 @@ import torchvision.transforms as T
 
 transform = T.Compose([
     T.ToTensor(),
-    T.Resize((270, 480))
+    T.Resize((270, 480), interpolation = T.InterpolationMode.NEAREST)
 ])
 
 class cfg:

@@ -24,11 +24,13 @@ if __name__ == "__main__":
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
+
     train_dataset = dataset_dict[cfg.train_dataset['name']](**(cfg.train_dataset['args']))
     train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
     validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
     model = build_model(cfg.model, device)
+    
     if args.model_path is None:
         loss_plot = model.train_epochs(train_dataloader, validation_dataloader) 
     else:
