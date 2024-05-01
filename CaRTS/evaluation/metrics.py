@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.ndimage import binary_dilation
+from . import surface_distance
 
-def dice_scores(preds, gts):
+def dice_scores(preds, gts, smooth = 1e-10):
     '''
     Caculate dice scores of tool for each image.
     attributes:
@@ -12,10 +13,15 @@ def dice_scores(preds, gts):
     return:
         dice_scores: numpy array with shape n.
     '''
-    smooth = 1e-10
-    tool_mask = preds >= 0.5
-    num = 2 * (tool_mask * gts).sum(axis = (1,2)) + smooth
-    denom = (gts.sum(axis = (1,2)) + tool_mask.sum(axis = (1,2))) + smooth
+    #preds = preds.detach().cpu().numpy()
+    #gts = gts.detach().cpu().numpy()
+
+    # tool_mask = preds >= 0.5
+    # num = 2 * (tool_mask * gts).sum(axis = (1,2)) + smooth
+    # denom = (gts.sum(axis = (1,2)) + tool_mask.sum(axis = (1,2))) + smooth
+
+    num = 2 * (preds * gts).sum() + smooth
+    denom = (gts.sum() + preds.sum()) + smooth
     dice_scores =  num / denom 
     return dice_scores
 
@@ -31,34 +37,10 @@ def normalized_surface_distances(preds, gts, tau):
     return:
         nsd: numpy array with shape n.
     '''
-    # 
-
-    preds = preds.squeeze().cpu().detach().numpy()
-    gts = gts.squeeze().cpu().detach().numpy()
-
-    # get boundary pixels of ground truth masks
-    boundary_gts = np.logical_or(
-        np.abs(np.diff(gts, axis=0, prepend=0)) > 0,
-        np.abs(np.diff(gts, axis=1, prepend=0)) > 0
-    )
-
-    # get boundary pixels of predicted masks
-    boundary_preds = np.logical_or(
-        np.abs(np.diff(preds, axis=0, prepend=0)) > 0,
-        np.abs(np.diff(preds, axis=1, prepend=0)) > 0
-    )
-
-    # Expand the boundary region to include border of width tau
-    kernel_width = 2 * tau + 1
-    dilation_kernel = np.full(shape=(kernel_width, kernel_width), fill_value=1)
-    border_gts = binary_dilation(boundary_gts, structure=dilation_kernel)
-    border_preds = binary_dilation(preds, structure=dilation_kernel)
-
-    # Compute intersections
-    intersect_gts_in_preds = np.sum(boundary_gts & border_preds)
-    intersect_preds_in_gts = np.sum(boundary_preds & border_gts)
-
-    nsd = (intersect_gts_in_preds + intersect_preds_in_gts) / float(np.sum(boundary_gts) + np.sum(boundary_preds))
-
-    return nsd
     
+    #preds = preds.detach().cpu().numpy().squeeze().astype(bool)
+    #gts = gts.detach().cpu().numpy().squeeze().astype(bool)
+
+
+    surface_distances = surface_distance.compute_surface_distances(gts, preds, [1,1])
+    return surface_distance.compute_surface_dice_at_tolerance(surface_distances, tau)

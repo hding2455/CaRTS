@@ -106,6 +106,7 @@ class ElasticTransform(torch.nn.Module):
 
         Returns:
             PIL Image or Tensor: Transformed image.
+            List of transformnation: Transformations applied to the ground truth
         """
         gt_transforms = []
         _, height, width = F.get_dimensions(tensor)
@@ -113,7 +114,8 @@ class ElasticTransform(torch.nn.Module):
         prob = torch.rand(1)
         if prob < 0.5:
             img_transform = lambda x : F.elastic_transform(x, displacement, self.interpolation, self.fill)
-            gt_transforms.append(img_transform)
+            gt_transform = lambda x : F.elastic_transform(x, displacement, InterpolationMode.NEAREST, self.fill)
+            gt_transforms.append(gt_transform)
             return img_transform(tensor), gt_transforms
         
         return tensor, gt_transforms

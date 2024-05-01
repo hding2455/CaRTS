@@ -50,6 +50,7 @@ class RandomPerspective(torch.nn.Module):
 
         Returns:
             PIL Image or Tensor: Randomly transformed image.
+            List of transformnation: Transformations applied to the ground truth
         """
 
         gt_transforms = []
@@ -65,7 +66,7 @@ class RandomPerspective(torch.nn.Module):
         if torch.rand(1) < self.p:
             startpoints, endpoints = self.get_params(width, height, self.distortion_scale)
             image_transform = lambda x : F.perspective(x, startpoints, endpoints, self.interpolation, fill)
-            gt_transform = lambda x : F.perspective(x, startpoints, endpoints, self.interpolation, [0.0])
+            gt_transform = lambda x : F.perspective(x, startpoints, endpoints, InterpolationMode.NEAREST, [float(0),])
             gt_transforms.append(gt_transform)
             return image_transform(img), gt_transforms
         return img, gt_transforms

@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from .vision_base import VisionBase
+import numpy as np
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
@@ -36,7 +37,6 @@ class Down(nn.Module):
     def forward(self, x):
         return self.maxpool_conv(x)
 
-
 class Up(nn.Module):
     """Upscaling then double conv"""
 
@@ -64,7 +64,6 @@ class Up(nn.Module):
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
-
 
 class OutConv(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -102,8 +101,6 @@ class Unet(VisionBase):
 
     def get_feature_map(self, x):
         image = x['image']
-        # image = image.permute(0,3,1,2)
-        #image = nn.functional.interpolate(image, size=(self.target_size[0], self.target_size[1]), mode='bilinear')
         x1 = self.inc(image)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
