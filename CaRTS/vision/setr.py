@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.transforms as T
+
 from .vision_base import VisionBase
 
 
@@ -178,7 +180,8 @@ class SegmentationTransformer(VisionBase):
     def __init__(self, params, device):
         super(SegmentationTransformer, self).__init__(params, device)
 
-        self.img_dim = params['img_dim']
+        self.input_size = params['input_size']
+        self.output_size = params['output_size']
         self.embedding_dim = params['embedding_dim']
         self.num_heads = params['num_heads']
         self.patch_dim = params['patch_dim']
@@ -194,10 +197,10 @@ class SegmentationTransformer(VisionBase):
         self.out = None
 
         assert self.embedding_dim % self.num_heads == 0
-        assert self.img_dim[0] % self.patch_dim == 0
-        assert self.img_dim[1] % self.patch_dim == 0
+        assert self.input_size[0] % self.patch_dim == 0
+        assert self.input_size[1] % self.patch_dim == 0
 
-        self.num_patches = int((self.img_dim[0] // self.patch_dim) * (self.img_dim[1] // self.patch_dim))
+        self.num_patches = int((self.input_size[0] // self.patch_dim) * (self.input_size[1] // self.patch_dim))
         self.seq_length = self.num_patches
         self.flatten_dim = self.patch_dim * self.patch_dim * self.num_channels
 
@@ -281,8 +284,10 @@ class SegmentationTransformer(VisionBase):
         
     
     def forward(self, x, auxillary_output_layers=None, return_loss=False):
+        x['image'] = T.Resize(self.input_size, interpolation=T.InterpolationMode.NEAREST)(x['image'])
         feature_map, intmd_encoder_outputs = self.get_feature_map(x, auxillary_output_layers)
         result = self.out(feature_map)
+        result = T.Resize(self.output_size, interpolation=T.InterpolationMode.NEAREST)(result)
 
         if auxillary_output_layers is not None:
             auxillary_outputs = {}
@@ -309,8 +314,8 @@ class SegmentationTransformer(VisionBase):
     def _reshape_output(self, x):
         x = x.view(
             x.size(0),
-            int(self.img_dim[0] / self.patch_dim),
-            int(self.img_dim[1] / self.patch_dim),
+            int(self.input_size[0] / self.patch_dim),
+            int(self.input_size[1] / self.patch_dim),
             self.embedding_dim,
         )
         x = x.permute(0, 3, 1, 2).contiguous()

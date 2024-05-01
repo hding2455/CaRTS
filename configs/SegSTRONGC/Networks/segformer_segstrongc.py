@@ -50,6 +50,8 @@ class cfg:
                     channels = 3,
                     decoder_dim = 256,
                     num_classes = 1,
+                    input_size = (256, 480),
+                    output_size = (270, 480),
                     criterion = BCELoss(),
                     train_params = dict(
                         perturbation = None,

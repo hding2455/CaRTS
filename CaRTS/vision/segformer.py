@@ -2,7 +2,7 @@ from math import sqrt
 from functools import partial
 import torch
 from torch import nn, einsum
-from torchvision.transforms import Resize
+import torchvision.transforms as T
 
 from einops import rearrange
 
@@ -167,6 +167,8 @@ class Segformer(VisionBase):
         self.decoder_dim = params['decoder_dim']
         self.num_classes = params['num_classes']
         self.criterion = params['criterion']
+        self.input_size = params['input_size']
+        self.output_size = params['output_size']
         self.dims, self.heads, self.ff_expansion, self.reduction_ratio, self.num_layers = map(partial(cast_tuple, depth = 4), (params['dims'], params['heads'], params['ff_expansion'], params['reduction_ratio'], params['num_layers']))
         assert all([*map(lambda t: len(t) == 4, (self.dims, self.heads, self.ff_expansion, self.reduction_ratio, self.num_layers))]), 'only four stages are allowed, all keyword arguments must be either a single value or a tuple of 4 values'
 
@@ -195,14 +197,15 @@ class Segformer(VisionBase):
     def get_feature_map(self, x):
         image = x['image']
         layer_outputs = self.mit(image, return_layer_outputs = True)
-
         fused = [to_fused(output) for output, to_fused in zip(layer_outputs, self.to_fused)]
         fused = torch.cat(fused, dim = 1)
         return fused
 
     def forward(self, x, return_loss=False):
+        x['image'] = T.Resize(self.input_size, interpolation=T.InterpolationMode.NEAREST)(x['image'])
         feature_map = self.get_feature_map(x)
         result = self.to_segmentation(feature_map)
+        result = T.Resize(self.output_size, interpolation=T.InterpolationMode.NEAREST)(result)
         if return_loss:
             gt = x['gt']
             loss = self.criterion(result.sigmoid(), gt)

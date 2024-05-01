@@ -46,7 +46,8 @@ class cfg:
     model = dict(
                 name = "SETR_PUP",
                 params = dict(
-                    img_dim = (272, 480),
+                    input_size = (272, 480),
+                    output_size = (270, 480),
                     patch_dim = 16,
                     num_channels = 3,
                     num_classes = 1,
