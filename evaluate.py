@@ -32,8 +32,8 @@ def parse_args():
     return args
 
 def assemble_results(folder, domain):
+    gts = np.load(os.path.join(folder, "gt.npy")).squeeze()
     work_folder = os.path.join(folder, domain)
-    gts = np.load(os.path.join(work_folder, "gt.npy")).squeeze()
     teams = []
     tmp = os.listdir(work_folder)
     for t in tmp:

@@ -46,30 +46,32 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         data['iteration'] = i
         pred = model(data)['pred']
         
-        result = np.where(pred[0].cpu().detach().numpy()>0.5, 1, 0)
+        result = (pred[0].cpu().detach().numpy() > 0.5).squeeze()
         results.append(result)
+        
+        mask = (data['gt'].cpu().numpy() > 0.5).squeeze()
 
+        dice_tool = dice_scores(result, mask)
+        nsd = normalized_surface_distances(result, mask, tau)
+        dice_tools.append(dice_tool)
+        nsds.append(nsd)
         if save_dir is not None:
-            print(pred.shape, data['gt'].shape)
-            dice_tool = dice_scores((pred > 0.5).squeeze(), data['gt'])
-            nsd = normalized_surface_distances((pred > 0.5).squeeze(), data['gt'], tau)
-            dice_tools.append(dice_tool)
-            nsds.append(nsd)
+            results.append(result)
         
     elapsed = time.time() - start
     print("iteration per Sec: %f" %
         ((i+1) / elapsed))
+    print("mean: dice_tool: %f " %
+            (np.mean([dice_tools])))
+    print("std: dice_tool: %f " %
+            (np.std([dice_tools])))
+    print("mean: nsd: %f" %
+            (np.mean([nsds])))
+    print("std: nsd: %f" %
+            (np.std([nsds])))
     
     if save_dir is not None:
         np.save(os.path.join(save_dir, "pred.npy"), results)
-        print("mean: dice_tool: %f " %
-            (np.mean([dice_tools])))
-        print("std: dice_tool: %f " %
-            (np.std([dice_tools])))
-        print("mean: nsd: %f" %
-            (np.mean([nsds])))
-        print("std: nsd: %f" %
-            (np.std([nsds])))
     
 
 if __name__ == "__main__":
