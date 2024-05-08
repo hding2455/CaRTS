@@ -36,13 +36,17 @@ We only used one GPU for training and inference so we haven't implement multi-gp
 
     python train.py --config UNet_SegSTRONGC
 
-### To run inference, give the name of the config and the path to the checkpoint file for networks to load:
+### To run inference on validation set, give the name of the config and the path to the checkpoint file for networks to load:
 
-    python validate.py --config CONFIG_FILENAME --model_path CHECKPOINT_PATH --test TEST --domain DOMAIN_NAME
+    python validate.py --config CONFIG_FILENAME --model_path CHECKPOINT_PATH --domain DOMAIN_NAME
 
 ### for example:
 
-    python validate.py --config UNet_SegSTRONGC --model_path checkpoints/unet_segstrongc/model_39.pth --test True --domain regular
+    python validate.py --config UNet_SegSTRONGC --model_path checkpoints/unet_segstrongc/model_39.pth --domain regular
+
+### The final test will be on test set(for example):
+
+    python validate.py --config UNet_SegSTRONGC --model_path checkpoints/unet_segstrongc/model_39.pth --test True --domain smoke --save_dir /workspace/data/SegSTRONG-C/results/smoke
 
 ## Dataset preparation:
 
