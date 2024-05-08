@@ -18,7 +18,7 @@ class cfg:
     train_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
-            root_folder = '/workspace/data/SegSTRONG-C', 
+            root_folder = '/workspace/data/SegSTRONGC_release', 
             split = 'train',
             set_indices = [3,4,5,7,8], 
             subset_indices = [[0,2], [0,1,2], [0,2], [0,1], [1,2]], 
@@ -28,7 +28,7 @@ class cfg:
     validation_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
-            root_folder = '/workspace/data/SegSTRONG-C', 
+            root_folder = '/workspace/data/SegSTRONGC_release', 
             split = 'val', 
             set_indices = [1], 
             subset_indices = [[0,1,2]], 
@@ -38,7 +38,7 @@ class cfg:
     test_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
-            root_folder = '/workspace/data/SegSTRONG-C', 
+            root_folder = '/workspace/data/SegSTRONGC_release', 
             split = 'test', 
             set_indices = [9], 
             subset_indices = [[0,1,2]], 
