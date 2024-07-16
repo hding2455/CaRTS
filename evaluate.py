@@ -5,7 +5,8 @@ import os
 import cv2
 from CaRTS.evaluation.metrics import dice_scores, normalized_surface_distances
 from scipy import stats
-
+import matplotlib.pyplot as plt
+from datasets.transformation import autoaugment, elastic, projective
 
 def pairwise_significance(scores_0, scores_1, threshold = 0.05):
     '''
@@ -71,6 +72,38 @@ def rank(teams, metrics = ['dice', 'nsd']):
                 m_teams[i][m + 'score'] = m_teams[anchor_idx][m + 'score']
         for t in m_teams:
             print(t['name'], t['mean_' + m], t[m + 'score'])
+
+def plot_segmentation(predicted, gt, image, i):
+    TP = (predicted == 1) & (gt == 1)
+    FP = (predicted == 1) & (gt == 0)
+    TN = (predicted == 0) & (gt == 0)
+    FN = (predicted == 0) & (gt == 1)
+    result = np.zeros_like(predicted, dtype=np.uint8)
+    result[TP] = 0
+    result[TN] = 1
+    result[FP] = 2
+    result[FN] = 3
+
+    fig, axs = plt.subplots(1, 1, figsize=(10,10))
+    colors = [(1, 1, 1), (0, 0, 0), (1, 0.647, 0), (1, 0, 0)]
+    cmap = plt.matplotlib.colors.ListedColormap(colors)
+    # axs.imshow(result, cmap=cmap, interpolation='nearest')
+    axs.imshow(image.squeeze().permute(1,2,0)/255, interpolation="nearest")
+
+    axs.axis("off")
+    fig.savefig(f"baseline_img/1.png", bbox_inches="tight", pad_inches=0, dpi=300)
+
+def plot_augmentation(img, i):
+    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+    axs[0].imshow(img.permute(1,2,0))
+    axs[0].title.set_text('Input image')
+    axs[1].imshow(autoaugment.AutoAugment(img)[0].permute(1,2,0))
+    axs[1].title.set_text('AutoAugment')
+    axs[2].imshow(elastic.Elastic(img)[0].permute(1,2,0))
+    axs[2].title.set_text('Elastic')
+    axs[3].imshow(projective.Projective(img)[0].permute(1,2,0))
+    axs[3].title.set_text('Projective')
+    fig.savefig(f"augmentation_result_{i}", bbox_inches="tight", dpi=300)
 
 if __name__ == "__main__":
     args = parse_args()
