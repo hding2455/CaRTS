@@ -9,6 +9,7 @@ import argparse
 import os
 from CaRTS import build_model
 from CaRTS.evaluation.metrics import dice_scores, normalized_surface_distances
+from evaluate import plot_segmentation, plot_augmentation
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -50,6 +51,10 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         results.append(result)
         
         mask = (data['gt'].cpu().numpy() > 0.5).squeeze()
+
+        # plot_segmentation(result, mask, image, i)
+        # plot_augmentation(image.squeeze().to(torch.uint8), i)
+        
 
         dice_tool = dice_scores(result, mask)
         nsd = normalized_surface_distances(result, mask, tau)

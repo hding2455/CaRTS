@@ -63,10 +63,11 @@ class SegSTRONGC(data.Dataset):
 
                 # Apply the same image transformation to gt
                 if self.gt_transforms[i]:
+                    image = output
                     gt = image_transform(gt)
 
                 # User defined transformation 
-                if isinstance(output, tuple):
+                elif isinstance(output, tuple):
                     image, gt_transforms = output
                     if gt_transforms is not None:
                         gt = gt_transforms(gt)
