@@ -14,6 +14,11 @@ This challenge is originated from:
 > Hao Ding, Jie Ying Wu, Zhaoshuo Li, Mathias Unberath
 > Int J CARS 18, 1009–1016 (2023)
 > *arXiv preprint ([arXiv 2203.09475](https://arxiv.org/abs/2212.00072))*
+>
+> [**SegSTRONG-C: Segmenting Surgical Tools Robustly On Non-adversarial Generated Corruptions -- An EndoVis'24 Challenge**](https://arxiv.org/abs/2407.11906),
+> Hao Ding, Tuxun Lu, Yuqian Zhang, Ruixing Liang, Hongchao Shu, Lalithkumar Seenivasan, Yonghao Long, Qi Dou, Cong Gao, Mathias Unberath
+> 2024
+> *arXiv preprint ([arXiv 2203.09475](https://arxiv.org/abs/2407.11906))*
 
 ## Installation
 
@@ -70,6 +75,16 @@ Please consider citing our papers in your publications if this repo helps you.
   journal={International Journal of Computer Assisted Radiology and Surgery},
   year={2022},
   pages={1009 - 1016},
+}
+
+@misc{ding2024segstrongcsegmentingsurgicaltools,
+      title={SegSTRONG-C: Segmenting Surgical Tools Robustly On Non-adversarial Generated Corruptions -- An EndoVis'24 Challenge}, 
+      author={Hao Ding and Tuxun Lu and Yuqian Zhang and Ruixing Liang and Hongchao Shu and Lalithkumar Seenivasan and Yonghao Long and Qi Dou and Cong Gao and Mathias Unberath},
+      year={2024},
+      eprint={2407.11906},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2407.11906}, 
 }
 ```
 
