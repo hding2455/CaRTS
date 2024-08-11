@@ -10,20 +10,20 @@ The pervasive false positives under smoke conditions indicate that the models in
 
 - DSC
 
-| Architecture \ Domain         | Bleeding            | Smoke               | Low Brightness              |       
-|:---------------------:        |:--------:           |:-----:              |:--------------:             |
-|       DeepLabv3+              |        0.6896       |      0.6538         |         0.5352              |
-|       Segformer               |        0.6802       |      0.6906         |         0.6145              |                                      
-|       SETR PUP                |        0.4717       |      0.5848         |         0.4053              |
-|       SETR MLA                |        0.5358       |      0.6206         |         0.3385              |                                      
-|       SETR Naive              |        0.5064       |      0.6657         |         0.0275              |
-|       UNet                    |        0.7052       |      0.6603         |         0.5750              |
-|       UNet + AutoAugment      |        0.7910       |      0.8895         |         0.6965              |                                      
-|       UNet + Elastic          |        0.6910       |      0.6583         |         0.5190              |                                      
-|       UNet + Projective       |        0.6903       |      0.6978         |         0.5792              |                                      
-|       SETR MLA + AutoAugment  |        0.1918       |      0.2157         |         0.0934              |                                        
-|       SETR MLA + Elastic      |        0.5350       |      0.6192         |         0.3472              |                                      
-|       SETR MLA + Projective   |        0.4168       |      0.5766         |         0.1447              |
+| Architecture \ Domain         | Bleeding            | Smoke               | Low Brightness              |checkpoints                |       
+|:---------------------:        |:--------:           |:-----:              |:--------------:             |:--------------:           |
+|       DeepLabv3+              |        0.6896       |      0.6538         |         0.5352              | [download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EQpXqfvRFDNOgDCXBRKSvrkB_K2x1QTaszFwudz2LH__sQ?e=t5BEQx)|
+|       Segformer               |        0.6802       |      0.6906         |         0.6145              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EYKtSiqhRFlNi25NuJorqhsB_DWfQDUi6MfXssawBBkh0A?e=Yp1saj)|                         
+|       SETR PUP                |        0.4717       |      0.5848         |         0.4053              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EWKWT3yPxcBLgONbcV2d_bcBF6p3aYj84so-MobPC_1uzQ?e=AuZiMz)|
+|       SETR MLA                |        0.5358       |      0.6206         |         0.3385              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EcP1RXjEl_BFn27kVRlzGOsBApYqCVEwiGU9IMEnymlHkg?e=NmHoAo)|                                     
+|       SETR Naive              |        0.5064       |      0.6657         |         0.0275              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EYPyKUqjKZZPi03g4MezxnIBTbhdSWG-4xAjFpg8wcTP3A?e=aZUnof)|
+|       UNet                    |        0.7052       |      0.6603         |         0.5750              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EQpNqDMnKsBPovg3Cc4pQXUBlYHjZpkpYiNt24vkiQ6BIg?e=hrpQFr)|
+|       UNet + AutoAugment      |        0.7910       |      0.8895         |         0.6965              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EQzpFwOV2DZFnW_DoziSXisBypSLo7cN6TUBEbOqcr7DcQ?e=nFDzvD)|                                     
+|       UNet + Elastic          |        0.6910       |      0.6583         |         0.5190              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/Ec-1J3A5PNNOggjPVvUMl2kBKFcINvYn-biubiAdp0OiSg?e=aUFLZL)|                                    
+|       UNet + Projective       |        0.6903       |      0.6978         |         0.5792              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EZquhLnn5MdHpNTD0aUnW_0BCjpEtzXtgmHWG555iQQ3Nw?e=zTqaJo)|                                   
+|       SETR MLA + AutoAugment  |        0.1918       |      0.2157         |         0.0934              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/ESCzz6JoWzxFjuhYhJiLgzoBtE2c9ZrdS2orM9RDVRwHZw?e=LnKwpn)|                                    
+|       SETR MLA + Elastic      |        0.5350       |      0.6192         |         0.3472              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/Eamb_Kdiq6FKl46S2NUDdHEBmFJkIrcRRYRidw2IwoWoqw?e=6myjOy)|                                 
+|       SETR MLA + Projective   |        0.4168       |      0.5766         |         0.1447              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EUfZvca2_jVFo1h0cLVTmDsBACOQVulbhEQJsCtgmcfyCA?e=lElbF5)|
 
 - NSD
 
