@@ -24,24 +24,32 @@ The pervasive false positives under smoke conditions indicate that the models in
 |       SETR MLA + AutoAugment  |        0.1918       |      0.2157         |         0.0934              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/ESCzz6JoWzxFjuhYhJiLgzoBtE2c9ZrdS2orM9RDVRwHZw?e=LnKwpn)|                                    
 |       SETR MLA + Elastic      |        0.5350       |      0.6192         |         0.3472              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/Eamb_Kdiq6FKl46S2NUDdHEBmFJkIrcRRYRidw2IwoWoqw?e=6myjOy)|                                 
 |       SETR MLA + Projective   |        0.4168       |      0.5766         |         0.1447              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EUfZvca2_jVFo1h0cLVTmDsBACOQVulbhEQJsCtgmcfyCA?e=lElbF5)|
-
+|       SAM                     |        0.8791       |      0.7681         |         0.8134            |-|
+|       MedSAM                  |        0.2213       |      0.1408         |         0.2284            |-|
+|       SAM-Med2D               |        0.5302       |      0.5791         |         0.4132            |-|
+|       SAM2                    |        0.8628       |      0.8660         |         0.4373            |-|
 - NSD
 
-| Architecture \ Domain 	      | Bleeding 	          | Smoke 	            | Low Brightness 	      |
-|:---------------------:	      |:--------:	          |:-----:	            |:--------------:	      |
-|       DeepLabv3+              |        0.5629       |      0.4637         |         0.4000        |
+| Architecture \ Domain 	       | Bleeding 	          | Smoke 	             | Low Brightness 	     |
+|:---------------------:	       |:--------:	          |:-----:	             |:--------------:	     |
+|       DeepLabv3+              |        0.5629       |      0.4637         |         0.4000       |
 |       Segformer               |        0.5133       |      0.5266         |         0.4194      	|                                      
 |       SETR PUP                |        0.2531       |      0.3354         |         0.2599      	| 
 |       SETR MLA                |        0.2798       |      0.3374         |         0.1571      	|                                      
 |       SETR Naive              |        0.3312       |      0.4409         |         0.0092     		|  
-|       UNet                    |        0.5677       |      0.5084         |         0.4390        |
+|       UNet                    |        0.5677       |      0.5084         |         0.4390       |
 |       UNet + AutoAugment      |        0.6654       |      0.8152         |         0.5344      	|                                      
 |       UNet + Elastic          |        0.5622       |      0.5207         |         0.3931      	|                                      
 |       UNet + Projective       |        0.5661       |      0.5702         |         0.4265      	|                                      
 |       SETR MLA + AutoAugment  |        0.1172       |      0.0910         |         0.0773      	|                                            
 |       SETR MLA + Elastic      |        0.2836       |      0.3363         |         0.1654      	|                                      
 |       SETR MLA + Projective   |        0.2240       |      0.3055         |         0.0552      	|
+|       SAM                     |        0.5643       |      0.6260         |         0.2281       |
+|       MedSAM                  |        0.1636       |      0.1270         |         0.1418       |
+|       SAM-Med2D               |        0.3393       |      0.3546         |         0.2423       |
+|       SAM2                    |        0.8002       |      0.7808         |         0.2882       |
  
 ### Segmentation Visualizations 
 ![baseline results](../img/baseline_segmentation_result.png)
+![SAM results](../img/sam_results.png)
 
