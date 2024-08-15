@@ -24,10 +24,10 @@ The pervasive false positives under smoke conditions indicate that the models in
 |       SETR MLA + AutoAugment  |        0.1918       |      0.2157         |         0.0934              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/ESCzz6JoWzxFjuhYhJiLgzoBtE2c9ZrdS2orM9RDVRwHZw?e=LnKwpn)|                                    
 |       SETR MLA + Elastic      |        0.5350       |      0.6192         |         0.3472              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/Eamb_Kdiq6FKl46S2NUDdHEBmFJkIrcRRYRidw2IwoWoqw?e=6myjOy)|                                 
 |       SETR MLA + Projective   |        0.4168       |      0.5766         |         0.1447              |[download](https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/hding15_jh_edu/EUfZvca2_jVFo1h0cLVTmDsBACOQVulbhEQJsCtgmcfyCA?e=lElbF5)|
-|       SAM                     |        0.8791       |      0.7681         |         0.8134            |-|
-|       MedSAM                  |        0.2213       |      0.1408         |         0.2284            |-|
-|       SAM-Med2D               |        0.5302       |      0.5791         |         0.4132            |-|
-|       SAM2                    |        0.8628       |      0.8660         |         0.4373            |-|
+|       SAM (points / bbox)     | 0.7681 / 0.7496     |    0.8134 / 0.7475  |  0.4088 / 0.4846            |-|
+|       MedSAM (points / bbox)  | 0.2213 / 0.4743     |    0.1408 / 0.4582  |  0.2284 / 0.4762            |-|
+|       SAM-Med2D (points / bbox)|0.5302 / 0.3448     |    0.5791 / 0.4689  |  0.4132 / 0.4143            |-|
+|       SAM2 (points)           |        0.8628       |      0.8660         |         0.4373              |-|
 - NSD
 
 | Architecture \ Domain 	       | Bleeding 	          | Smoke 	             | Low Brightness 	     |
@@ -43,11 +43,11 @@ The pervasive false positives under smoke conditions indicate that the models in
 |       UNet + Projective       |        0.5661       |      0.5702         |         0.4265      	|                                      
 |       SETR MLA + AutoAugment  |        0.1172       |      0.0910         |         0.0773      	|                                            
 |       SETR MLA + Elastic      |        0.2836       |      0.3363         |         0.1654      	|                                      
-|       SETR MLA + Projective   |        0.2240       |      0.3055         |         0.0552      	|
-|       SAM                     |        0.5643       |      0.6260         |         0.2281       |
-|       MedSAM                  |        0.1636       |      0.1270         |         0.1418       |
-|       SAM-Med2D               |        0.3393       |      0.3546         |         0.2423       |
-|       SAM2                    |        0.8002       |      0.7808         |         0.2882       |
+|       SETR MLA + Projective   |        0.2240       |      0.3055         |         0.0552      	|   
+|       SAM (points / bbox)     | 0.5643 / 0.5846     |    0.6260 / 0.5884  |  0.2281 / 0.2586     |
+|       MedSAM (points / bbox)  | 0.1636 / 0.2347     |    0.1270 / 0.2304  |  0.1418 / 0.1577     |
+|       SAM-Med2D (points / bbox)|0.3393 / 0.2748     |    0.3546 / 0.2891  |  0.2423 / 0.2314     |
+|       SAM2 (points)           |        0.8002       |      0.7808         |         0.2882       |
  
 ### Segmentation Visualizations 
 ![baseline results](../img/baseline_segmentation_result.png)
