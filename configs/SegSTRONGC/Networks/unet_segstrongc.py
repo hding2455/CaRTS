@@ -14,8 +14,16 @@ class cfg:
         args = dict(
             root_folder = '/workspace/data/SegSTRONGC_release', 
             split = 'train',
-            set_indices = [3,4,5,7,8], 
-            subset_indices = [[0,2], [0,1,2], [0,2], [0,1], [1,2]], 
+            set_indices = {'regular':[3,4,5,7,8],
+                           'bg_change':[3,4,5,7,8],
+                           'blood':[3,4,5,7,8],
+                           'smoke':[3,4,5,7,8],
+                           'low_brightness':[3,4,5,7,8]},
+            subset_indices = {'regular':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'bg_change':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'blood':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'smoke':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'low_brightness':[[0,2], [0,1,2], [0,2], [0,1], [1,2]]},
             domains = ['regular'],
             image_transforms = [transform],
             gt_transforms = [True],))
@@ -62,5 +70,5 @@ class cfg:
                                 weight_decay = 10e-5)),
                         max_epoch_number=40,
                         save_interval=5,
-                        save_path='/workspace/code/checkpoints/unet_segstrongc/',
+                        save_path='/workspace/code/checkpoints/unet_segstrongc_fulldataset/',
                         log_interval=50)))
