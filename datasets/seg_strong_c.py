@@ -28,14 +28,19 @@ class SegSTRONGC(data.Dataset):
         self.image_paths = []
         self.gt_paths = []
 
-        for set_idx, s in enumerate(self.set_indices):
-            for ss in self.subset_indices[set_idx]:
-                set_folder = osp.join(self.root_folder, self.split + '/' + str(s) + '/' + str(ss))
-                gt_folder = osp.join(set_folder, 'ground_truth')
-                
-                image_numbers = len(os.listdir(osp.join(gt_folder, 'left')))
-
-                for d in self.domains:
+        for d in self.domains:
+            if type(self.set_indices) == dict:
+                tmp_set_indices = self.set_indices[d]
+                tmp_subset_indices = self.subset_indices[d]
+            elif type(self.set_indices) == list:
+                tmp_set_indices = self.set_indices
+                tmp_subset_indices = self.subset_indices
+            for set_idx, s in enumerate(tmp_set_indices):
+                for ss in tmp_subset_indices[set_idx]:
+                    set_folder = osp.join(self.root_folder, self.split + '/' + str(s) + '/' + str(ss))
+                    gt_folder = osp.join(set_folder, 'ground_truth')
+                    image_numbers = len(os.listdir(osp.join(gt_folder, 'left')))
+                #for d in self.domains:
                     image_folder = osp.join(set_folder, d)
                     for i in range(image_numbers):
                         image_name = str(i) + ".png"
@@ -81,6 +86,7 @@ class SegSTRONGC(data.Dataset):
         return image, gt
 
 if __name__ == '__main__':
-    segstrong = SegSTRONGC(root_folder = '/data/home/hao/SegSTRONG-C', split = 'train', set_indices = [3,4,5,6], subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], domains = ['regular'])
+    #segstrong = SegSTRONGC(root_folder = '/data/home/hao/SegSTRONG-C', split = 'train', set_indices = [3,4,5,7,8], subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], domains = ['regular'])
+    segstrong = SegSTRONGC(root_folder = '/data/home/hao/SegSTRONG-C', split = 'train', set_indices = [3,4,5,7,8], subset_indices = [[0,2], [0,1,2], [0,1,2], [0,1,2]], domains = ['regular'])
     # for i in range(len(segstrong)):
     #     print(segstrong[i][0].shape, segstrong[i][1].shape)
