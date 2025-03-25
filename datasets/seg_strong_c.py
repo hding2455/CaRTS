@@ -37,8 +37,9 @@ class SegSTRONGC(data.Dataset):
                 tmp_subset_indices = self.subset_indices
             for set_idx, s in enumerate(tmp_set_indices):
                 for ss in tmp_subset_indices[set_idx]:
+                    #set_folder = osp.join(self.root_folder, "augmented_test/1.5" + '/' + str(s) + '/' + str(ss))
                     set_folder = osp.join(self.root_folder, self.split + '/' + str(s) + '/' + str(ss))
-                    gt_folder = osp.join(set_folder, 'ground_truth')
+                    gt_folder = osp.join(self.root_folder, self.split + '/' + str(s) + '/' + str(ss), 'ground_truth')
                     image_numbers = len(os.listdir(osp.join(gt_folder, 'left')))
                 #for d in self.domains:
                     image_folder = osp.join(set_folder, d)
@@ -49,6 +50,7 @@ class SegSTRONGC(data.Dataset):
                         self.gt_paths.append(osp.join(gt_folder, 'left/' + gt_name))
                         self.image_paths.append(osp.join(image_folder, 'right/' + image_name))
                         self.gt_paths.append(osp.join(gt_folder, 'right/' + gt_name))
+        print(len(self.image_paths))
 
 
 

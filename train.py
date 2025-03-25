@@ -25,14 +25,22 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
 
-    train_dataset = dataset_dict[cfg.train_dataset['name']](**(cfg.train_dataset['args']))
-    train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-    validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
-    validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
-    model = build_model(cfg.model, device)
+    set_indices = [3,4,5,7,8]
+    domains = ['regular', 'smoke']
+    for i in range(5):
+        cfg.train_dataset['args']['set_indices'][domains[1]] = set_indices[:i+1]
+        cfg.train_dataset['args']['domains'] = domains
+        cfg.model['params']['train_params']['save_path'] = "/workspace/code/checkpoints/unet_segstrongc_autoaugment_" + domains[1] + "_" + str(i)
+        print(cfg.model)
+        print(cfg.train_dataset)
+        train_dataset = dataset_dict[cfg.train_dataset['name']](**(cfg.train_dataset['args']))
+        train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=4)
+        #validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
+        #validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=False, num_workers=1)
+        model = build_model(cfg.model, device)
     
-    if args.model_path is None:
-        loss_plot = model.train_epochs(train_dataloader, validation_dataloader) 
-    else:
-        model.load_parameters(args.model_path)
-        loss_plot = model.train_epochs(train_dataloader, validation_dataloader) 
+        if args.model_path is None:
+            loss_plot = model.train_epochs(train_dataloader, train_dataloader) 
+        else:
+            model.load_parameters(args.model_path)
+            loss_plot = model.train_epochs(train_dataloader, validation_dataloader) 

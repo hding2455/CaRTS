@@ -18,13 +18,15 @@ class cfg:
                            'bg_change':[3,4,5,7,8],
                            'blood':[3,4,5,7,8],
                            'smoke':[3,4,5,7,8],
-                           'low_brightness':[3,4,5,7,8]},
+                           'low_brightness':[3,4,5,7,8]
+                           },
             subset_indices = {'regular':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
                               'bg_change':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
                               'blood':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
                               'smoke':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
-                              'low_brightness':[[0,2], [0,1,2], [0,2], [0,1], [1,2]]},
-            domains = ['regular'],
+                              'low_brightness':[[0,2], [0,1,2], [0,2], [0,1], [1,2]]
+                            },
+            domains = ['regular', 'bg_change'],
             image_transforms = [transform],
             gt_transforms = [True],))
     validation_dataset = dict(
@@ -68,7 +70,7 @@ class cfg:
                                 lr = 0.01,
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
-                        max_epoch_number=40,
+                        max_epoch_number=20,
                         save_interval=5,
-                        save_path='/workspace/code/checkpoints/unet_segstrongc_fulldataset/',
-                        log_interval=50)))
+                        save_path='/workspace/code/checkpoints/unet_segstrongc_bg_change_4/',
+                        log_interval=500)))

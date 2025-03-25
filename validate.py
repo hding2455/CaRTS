@@ -48,7 +48,7 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         pred = model(data)['pred']
         
         result = (pred[0].cpu().detach().numpy() > 0.5).squeeze()
-        results.append(result)
+        #results.append(result)
         
         mask = (data['gt'].cpu().numpy() > 0.5).squeeze()
 
@@ -89,7 +89,6 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
 
-        cfg.validation_dataset['args']['domains'] = [args.domain]
 
     if args.domain is not None:
         domain = args.domain
@@ -100,7 +99,9 @@ if __name__ == "__main__":
             
     dataset = None
     datatloader = None
-    save_dir = args.save_dir
+    save_dir = args.save_dir.replace("domain", domain)
+    print(save_dir)
+
 
     if args.test:
         dataset = dataset_dict[cfg.test_dataset['name']](**(cfg.test_dataset['args']))

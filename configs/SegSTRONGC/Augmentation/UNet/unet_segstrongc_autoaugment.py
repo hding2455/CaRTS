@@ -20,9 +20,19 @@ class cfg:
         args = dict(
             root_folder = '/workspace/data/SegSTRONGC_release', 
             split = 'train',
-            set_indices = [3,4,5,7,8], 
-            subset_indices = [[0,2], [0,1,2], [0,2], [0,1], [1,2]], 
-            domains = ['regular'],
+            set_indices = {'regular':[3,4,5,7,8],
+                           'bg_change':[3,4,5,7,8],
+                           'blood':[3,4,5,7,8],
+                           'smoke':[3,4,5,7,8],
+                           'low_brightness':[3,4,5,7,8]
+                           },
+            subset_indices = {'regular':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'bg_change':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'blood':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'smoke':[[0,2], [0,1,2], [0,2], [0,1], [1,2]],
+                              'low_brightness':[[0,2], [0,1,2], [0,2], [0,1], [1,2]]
+                            },
+            domains = ['regular', 'bg_change'],
             image_transforms = [transform, lambda x : x.to(torch.uint8), AutoAugment, lambda x : x.to(torch.float)],
             gt_transforms = [True, False, False, False],))
     validation_dataset = dict(
@@ -66,7 +76,7 @@ class cfg:
                                 lr = 0.01,
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
-                        max_epoch_number=40,
+                        max_epoch_number=20,
                         save_interval=5,
                         save_path='/workspace/code/checkpoints/unet_segstrongc_autoaugment/',
                         log_interval=50)))
