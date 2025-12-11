@@ -1,2 +1,3 @@
-from .Networks import UNet_SegSTRONGC, SETR_Naive_SegSTRONGC, SETR_MLA_SegSTRONGC, SETR_PUP_SegSTRONGC, DeepLabV3p_SegSTRONGC, Segformer_SegSTRONGC
+from .Networks import UNet_SegSTRONGC, SETR_Naive_SegSTRONGC, SETR_MLA_SegSTRONGC, SETR_PUP_SegSTRONGC, DeepLabV3p_SegSTRONGC, Segformer_SegSTRONGC, HRNet_SegSTRONGC, Mask2Former_SegSTRONGC, UNetPlusPlus_SegSTRONGC
 from .Augmentation import UNet_SegSTRONGC_Projective, UNet_SegSTRONGC_AutoAugment, UNet_SegSTRONGC_Elastic, SETR_MLA_SegSTRONGC_AutoAugment, SETR_MLA_SegSTRONGC_Elastic, SETR_MLA_SegSTRONGC_Projective
+from .Foundation import SAM3_SegSTRONGC

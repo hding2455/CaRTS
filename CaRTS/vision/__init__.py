@@ -5,6 +5,8 @@ from .stm import STM
 from .setr import SETR_Naive, SETR_MLA, SETR_PUP
 from .deeplabv3p import DeepLabv3_plus
 from .segformer import Segformer
+from .unetplusplus import UnetPlusPlus
+from .mask2former import Mask2Former
 from .tta import SegmentationTTAWrapper
 
 model_dict = {
@@ -16,7 +18,9 @@ model_dict = {
     "SETR_PUP": SETR_PUP,
     "DeepLabv3_plus": DeepLabv3_plus,
     "Segformer": Segformer,
-    "SegmentationTTAWrapper": SegmentationTTAWrapper
+    "SegmentationTTAWrapper": SegmentationTTAWrapper,
+    "UnetPlusPlus": UnetPlusPlus,
+    "Mask2Former": Mask2Former,
 }
 
 

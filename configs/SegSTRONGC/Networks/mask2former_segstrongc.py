@@ -1,19 +1,20 @@
 from torch.optim import  SGD
-from torch.nn import BCELoss
+from torch.nn import BCEWithLogitsLoss
 from torch.optim.lr_scheduler import StepLR
 import torchvision.transforms as T
 
 transform = T.Compose([
     T.ToTensor(),
-    T.Resize((270, 480), interpolation = T.InterpolationMode.NEAREST)
+    T.Resize((288, 480), interpolation = T.InterpolationMode.NEAREST)
 ])
 
 class cfg:
     train_dataset = dict(
         name = "SegSTRONGC",
+        batch_size = 32,
         args = dict(
-            root_folder = '/home/hding2455/data/SegSTRONGC/', 
-            split = 'train',
+            root_folder = '/home/hding2455/SegSTRONGC/data/SegSTRONGC', 
+            split = 'SegSTRONGC_train',
             set_indices = {'regular':[3,4,5,7,8],
                            'bg_change':[3,4,5,7,8],
                            'blood':[3,4,5,7,8],
@@ -30,9 +31,9 @@ class cfg:
     validation_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
-            root_folder = '/home/hding2455/data/SegSTRONGC/', 
-            split = 'train', 
-            set_indices = [4], 
+            root_folder = '/home/hding2455/SegSTRONGC/data/SegSTRONGC', 
+            split = 'SegSTRONGC_val/val', 
+            set_indices = [1], 
             subset_indices = [[0,1,2]], 
             domains = ['regular'],
             image_transforms = [transform],
@@ -40,21 +41,21 @@ class cfg:
     test_dataset = dict(
         name = "SegSTRONGC",
         args = dict(
-            root_folder = '/home/hding2455/data/SegSTRONGC/', 
-            split = 'test', 
+            root_folder = '/home/hding2455/SegSTRONGC/data/SegSTRONGC', 
+            split = 'SegSTRONGC_test/test', 
             set_indices = [9], 
             subset_indices = [[0,1,2]], 
             domains = ['regular'],
             image_transforms = [transform],
             gt_transforms = [True],))
     model = dict(
-                name = "Unet",
+                name = "UnetPlusPlus",
                 params = dict(
                     input_dim = 3,
-                    hidden_dims = [512, 256, 128, 64, 32],
-                    size = (15, 20),
-                    target_size = (270, 480),
-                    criterion = BCELoss(),
+                    encoder_name = "resnet34",
+                    encoder_weights = "imagenet",
+                    criterion = BCEWithLogitsLoss(),
+                    target_size = (288, 480),
                     train_params = dict(
                         perturbation = None,
                         lr_scheduler = dict(
@@ -68,7 +69,7 @@ class cfg:
                                 lr = 0.01,
                                 momentum = 0.9,
                                 weight_decay = 10e-5)),
-                        max_epoch_number=20,
+                        max_epoch_number=40,
                         save_interval=5,
-                        save_path='/workspace/code/checkpoints/unet_segstrongc_fulldataset/',
+                        save_path='/workspace/code/checkpoints/unetplusplus_segstrongc_fulldataset/',
                         log_interval=50)))

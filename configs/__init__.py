@@ -24,6 +24,7 @@ config_dict = {
         "SETR_Naive_SegSTRONGC": SETR_Naive_SegSTRONGC,
         "SETR_MLA_SegSTRONGC": SETR_MLA_SegSTRONGC,
         "SETR_PUP_SegSTRONGC": SETR_PUP_SegSTRONGC,
+        "HRNet_SegSTRONGC": HRNet_SegSTRONGC,
         "UNet_SegSTRONGC": UNet_SegSTRONGC,
         "UNet_ENDOVIS": UNet_ENDOVIS,
         "UNet_ROBUSTMIS": UNet_ROBUSTMIS,
@@ -36,4 +37,7 @@ config_dict = {
         "SETR_MLA_SegSTRONGC_Elastic": SETR_MLA_SegSTRONGC_Elastic,
         "DeepLabV3p_SegSTRONGC": DeepLabV3p_SegSTRONGC,
         "TTA_Unet_CTS": TTA_Unet_CTS,
+        "SAM3_SegSTRONGC": SAM3_SegSTRONGC,
+        "UNetPlusPlus_SegSTRONGC": UNetPlusPlus_SegSTRONGC,
+        "Mask2Former_SegSTRONGC": Mask2Former_SegSTRONGC,
         }

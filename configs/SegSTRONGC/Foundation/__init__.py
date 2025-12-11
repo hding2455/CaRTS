@@ -1,0 +1,1 @@
+from .sam3 import cfg as SAM3_SegSTRONGC
