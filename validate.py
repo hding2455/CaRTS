@@ -47,25 +47,20 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
         data['iteration'] = i
         pred = model(data)['pred']
         
-        result = (pred[0].cpu().detach().numpy() > 0.5).squeeze()
-        results.append(result)
-        
-        mask = (data['gt'].cpu().numpy() > 0.5).squeeze()
-
-        # plot_segmentation(result, mask, image, i)
-        # plot_augmentation(image.squeeze().to(torch.uint8), i)
-        
-
-        dice_tool = dice_scores(result, mask)
-        nsd = normalized_surface_distances(result, mask, tau)
-        dice_tools.append(dice_tool)
-        nsds.append(nsd)
-        if save_dir is not None:
-            results.append(result)
+        for j in range(pred.shape[0]):
+            result = (pred[j].cpu().detach().numpy() > 0.5).squeeze()
+            mask = (data['gt'][j].cpu().numpy() > 0.5).squeeze()
+            dice_tool = dice_scores(result, mask)
+            nsd = normalized_surface_distances(result, mask, tau)
+            dice_tools.append(dice_tool)
+            nsds.append(nsd)
+            if save_dir is not None:
+                results.append(result)
+                gts.append(mask)
         
     elapsed = time.time() - start
     print("iteration per Sec: %f" %
-        ((i+1) / elapsed))
+        ((i+1) * 8 / elapsed))
     print("mean: dice_tool: %f " %
             (np.mean([dice_tools])))
     print("std: dice_tool: %f " %
@@ -75,8 +70,10 @@ def evaluate(model, dataloader, device, tau, save_dir=None):
     print("std: nsd: %f" %
             (np.std([nsds])))
     
+    print(len(results))
     if save_dir is not None:
         np.save(os.path.join(save_dir, "pred.npy"), results)
+        np.save(os.path.join("../checkpoints", "gt.npy"), gts)
     
 
 if __name__ == "__main__":
@@ -104,10 +101,10 @@ if __name__ == "__main__":
 
     if args.test:
         dataset = dataset_dict[cfg.test_dataset['name']](**(cfg.test_dataset['args']))
-        dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+        dataloader = DataLoader(dataset, batch_size=8, shuffle=False, num_workers=8)
     else:
         dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
-        dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+        dataloader = DataLoader(dataset, batch_size=8, shuffle=False, num_workers=8)
         
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)

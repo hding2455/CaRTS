@@ -34,23 +34,21 @@ def parse_args():
 
 def assemble_results(folder, domain):
     gts = np.load(os.path.join(folder, "gt.npy")).squeeze()
-    work_folder = os.path.join(folder, domain)
+    tmp = os.listdir(folder)
     teams = []
-    tmp = os.listdir(work_folder)
     for t in tmp:
-        path = os.path.join(work_folder, t)
-        print(t)
+        path = os.path.join(folder, t, domain)
         if os.path.isdir(path):
-            resized_preds = []
             dices = []
             nsds = []
             preds = np.load(os.path.join(path, "pred.npy")).squeeze().astype(np.float32)
             for i in range(len(preds)):
-                pred = cv2.resize(preds[i], (480, 270)) > 0.5
+                pred = cv2.resize(preds[i], (480, 288)) > 0.5
                 gt = gts[i] > 0.5
                 dices.append(dice_scores(pred, gt))
                 nsds.append(normalized_surface_distances(pred, gt, 5))
             teams.append({'name':t, 'mean_dice': np.mean(dices), 'mean_nsd': np.mean(nsds), 'dice': np.array(dices), 'nsd': np.array(nsds)})
+            print(t, np.mean(dices), np.mean(nsds))
     return teams
 
 def rank(teams, metrics = ['dice', 'nsd']):
@@ -108,6 +106,18 @@ def plot_augmentation(img, i):
 if __name__ == "__main__":
     args = parse_args()
     teams = assemble_results(args.folder, args.domain)
+    #sort teams by name:
+    teams = sorted(teams, key=lambda x: x['name'])
+    print("Final Results:")
     for t in teams:
-        print(t['name'], t['mean_dice'], t['mean_nsd'])
-    rank(teams)
+        print(t['name'])
+    print("dice:")
+    for t in teams:
+        print(t['mean_dice'])
+    print("nsd:")
+    for t in teams:
+        print(t['mean_nsd'])
+
+    # for t in teams:
+    #     print(t['name'], t['mean_dice'], t['mean_nsd'])
+    # rank(teams)

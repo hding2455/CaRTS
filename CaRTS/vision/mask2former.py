@@ -25,7 +25,7 @@ class Mask2Former(VisionBase):
         
         # replace the classification head.
         hidden_dim = self.model.config.hidden_dim
-        self.model.class_predictor = nn.Linear(hidden_dim, 2) # 0: background, 1: tool
+        self.model.class_predictor = nn.Linear(hidden_dim, 2)
         
         self.to(device=device)
 
@@ -35,11 +35,11 @@ class Mask2Former(VisionBase):
         # Normalize image: (image - mean) / std
         # Mask2Former expects ImageNet mean/std
         # image is [0, 1] from ToTensor
-        mean = torch.tensor([0.485, 0.456, 0.406], device=image.device).view(1, 3, 1, 1)
-        std = torch.tensor([0.229, 0.224, 0.225], device=image.device).view(1, 3, 1, 1)
-        normalized_image = (image - mean) / std
+        # mean = torch.tensor([0.485, 0.456, 0.406], device=image.device).view(1, 3, 1, 1)
+        # std = torch.tensor([0.229, 0.224, 0.225], device=image.device).view(1, 3, 1, 1)
+        # normalized_image = (image - mean) / std
         
-        outputs = self.model(pixel_values=normalized_image)
+        outputs = self.model(pixel_values=image)
         
         mask_logits = outputs.masks_queries_logits # (B, Q, H, W)
         class_logits = outputs.class_queries_logits # (B, Q, 2)
@@ -50,7 +50,8 @@ class Mask2Former(VisionBase):
         
         # Sigmoid over masks
         mask_probs = F.sigmoid(mask_logits) # (B, Q, H, W)
-        
+
+        # final_prob = mask_probs
         # Combine: Sum(Mask * ClassProb)
         tool_probs = tool_probs.unsqueeze(-1).unsqueeze(-1)
         final_prob = (mask_probs * tool_probs).sum(dim=1, keepdim=True) # (B, 1, H, W)
@@ -66,8 +67,8 @@ class Mask2Former(VisionBase):
         if return_loss:
             gt = x['gt']
             # Convert probability to logits for BCEWithLogitsLoss
-            logits = torch.logit(final_prob)
-            loss = self.criterion(logits, gt)
+            #logits = torch.logit(final_prob)
+            loss = self.criterion(final_prob, gt)
             return final_prob, loss
         else:
             x['pred'] = final_prob

@@ -24,12 +24,12 @@ class UnetPlusPlus(VisionBase):
     def forward(self, x, return_loss=False):
         image = x['image']
         # SMP models expect [B, C, H, W]
-        result = self.model(image)
+        result = self.model(image).sigmoid()
         
         if return_loss:
             gt = x['gt']
             loss = self.criterion(result, gt)
             return result, loss
         else:
-            x['pred'] = result.sigmoid()
+            x['pred'] = result
             return x

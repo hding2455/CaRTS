@@ -1,6 +1,6 @@
-from .UNet.unet_segstrongc_projective import cfg as UNet_SegSTRONGC_Projective
-from .UNet.unet_segstrongc_autoaugment import cfg as UNet_SegSTRONGC_AutoAugment
-from .UNet.unet_segstrongc_elastic import cfg as UNet_SegSTRONGC_Elastic
-from .SETR_MLA.setr_mla_segstrongc_autoaugment import cfg as SETR_MLA_SegSTRONGC_AutoAugment
-from .SETR_MLA.setr_mla_segstrongc_elastic import cfg as SETR_MLA_SegSTRONGC_Elastic
-from .SETR_MLA.setr_mla_segstrongc_projective import cfg as SETR_MLA_SegSTRONGC_Projective
+from .unet_segstrongc_autoaugment import cfg as UNet_SegSTRONGC_AutoAugment
+from .setr_mla_segstrongc_autoaugment import cfg as SETR_MLA_SegSTRONGC_AutoAugment
+from .unetplusplus_segstrongc_autoaugment import cfg as UNetPlusPlus_SegSTRONGC_AutoAugment
+from .mask2former_segstrongc_autoaugment import cfg as Mask2Former_SegSTRONGC_AutoAugment   
+from .deeplabv3_plus_segstrongc_autoaugment import cfg as DeepLabV3p_SegSTRONGC_AutoAugment
+from .segformer_segstrongc_autoaugment import cfg as Segformer_SegSTRONGC_AutoAugment

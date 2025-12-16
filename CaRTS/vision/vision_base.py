@@ -18,13 +18,12 @@ class VisionBase(nn.Module):
     def load_parameters(self, load_path):
         self.load_state_dict(torch.load(load_path, map_location=self.device)['state_dict'])
 
-    def train_epochs(self, train_dataloader, validation_dataloader, load_path=None):
+    def train_epochs(self, train_dataloader, validation_dataloader, save_path, load_path=None):
         train_params = self.train_params
         optimizer = train_params['optimizer']
         lr_scheduler = train_params['lr_scheduler']
         max_epoch_number = train_params['max_epoch_number']
         save_interval = train_params['save_interval']
-        save_path = train_params['save_path'] 
         log_interval = train_params['log_interval']
         perturbation = train_params['perturbation']
         device = self.device
