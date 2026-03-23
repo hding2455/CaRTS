@@ -28,6 +28,7 @@ class SegSTRONGC(data.Dataset):
         self.image_paths = []
         self.gt_paths = []
 
+        print("Loading SegSTRONGC dataset from domain(s): ", self.domains)
         for d in self.domains:
             if type(self.set_indices) == dict:
                 tmp_set_indices = self.set_indices[d]

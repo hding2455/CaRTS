@@ -40,9 +40,9 @@ if __name__ == "__main__":
     # set random seed for reproducibility
 
     train_dataset = dataset_dict[cfg.train_dataset['name']](**(cfg.train_dataset['args']))
-    train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=4)
+    train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=8)
     validation_dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
-    validation_dataloader = DataLoader(validation_dataset, batch_size=8, shuffle=False, num_workers=4)
+    validation_dataloader = DataLoader(validation_dataset, batch_size=2, shuffle=False, num_workers=8)
     model = build_model(cfg.model, device)
 
     save_path = cfg.model['params']['train_params']['save_path'] + args.config + args.seed + "/"

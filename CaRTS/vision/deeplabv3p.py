@@ -188,7 +188,7 @@ class DeepLabv3_plus(VisionBase):
         os = params['os']
         self.criterion = params['criterion']
         # Atrous Conv
-        self.resnet_features = ResNet101(params['InputChannels'], params['os'], pretrained=True)
+        self.resnet_features = ResNet101(params['InputChannels'], params['os'], pretrained=params['pretrained'])
 
         # ASPP
         if os == 16:
@@ -224,7 +224,8 @@ class DeepLabv3_plus(VisionBase):
                                        nn.BatchNorm2d(256),
                                        nn.ReLU(),
                                        nn.Conv2d(256, 1, kernel_size=1, stride=1))
-        self.__init_weight()
+        if not params['pretrained']:
+            self.__init_weight()
         self.to(device = device)
     
     def get_feature_map(self, x):

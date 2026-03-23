@@ -3,16 +3,19 @@ from torch.optim import  SGD, AdamW
 from torch.nn import BCELoss
 from torch.optim.lr_scheduler import StepLR
 from datasets.transformation.autoaugment import AutoAugment
+from datasets.transformation.custom_augment_heuristic import HeuristicAugment 
 import torch
 
-size = (288, 480)
-
+# size = (288, 480)
+size = (544, 960)
 
 
 transform = T.Compose([
     T.ToTensor(),
     T.Resize(size, interpolation = T.InterpolationMode.NEAREST),
 ])
+
+custom_augment = HeuristicAugment()
 
 train_dataset = dict(
     name = "SegSTRONGC",
@@ -34,9 +37,10 @@ train_dataset = dict(
         image_transforms = [transform, 
                             lambda x : (x*255).to(torch.uint8), 
                             AutoAugment, 
+                            custom_augment,
                             lambda x : (x/255.0).to(torch.float32), 
                             T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])],
-            gt_transforms = [True, False, False, False, False],))
+        gt_transforms = [True, False, False, False, False, False],))
 validation_dataset = dict(
     name = "SegSTRONGC",
     args = dict(

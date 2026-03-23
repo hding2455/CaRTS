@@ -68,7 +68,7 @@ train_params = dict(
             lr = 1e-4,
             weight_decay = 1e-4)),
     max_epoch_number=20,
-    save_interval=5,
+    save_interval=20,
     save_path='/home/hding2455/SegSTRONGC/checkpoints/',
     log_interval=300)
 

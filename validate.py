@@ -101,10 +101,10 @@ if __name__ == "__main__":
 
     if args.test:
         dataset = dataset_dict[cfg.test_dataset['name']](**(cfg.test_dataset['args']))
-        dataloader = DataLoader(dataset, batch_size=8, shuffle=False, num_workers=8)
+        dataloader = DataLoader(dataset, batch_size=2, shuffle=False, num_workers=8)
     else:
         dataset = dataset_dict[cfg.validation_dataset['name']](**(cfg.validation_dataset['args']))
-        dataloader = DataLoader(dataset, batch_size=8, shuffle=False, num_workers=8)
+        dataloader = DataLoader(dataset, batch_size=2, shuffle=False, num_workers=8)
         
     model = build_model(cfg.model, device)
     model.load_parameters(args.model_path)

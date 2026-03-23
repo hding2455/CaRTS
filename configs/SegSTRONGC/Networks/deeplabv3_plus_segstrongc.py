@@ -12,4 +12,5 @@ class cfg:
             os = 16, 
             target_size = size,
             criterion = loss,
+            pretrained = True,
             train_params = train_params))

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import Mask2FormerForUniversalSegmentation, Mask2FormerConfig
+from transformers import Mask2FormerForUniversalSegmentation, AutoConfig, AutoModel
 from .vision_base import VisionBase
 
 class Mask2Former(VisionBase):
@@ -16,8 +16,21 @@ class Mask2Former(VisionBase):
         # But we need to adapt it for binary semantic segmentation
         
         model_name = params.get('model_name', "facebook/mask2former-swin-tiny-coco-instance")
-        
-        self.model = Mask2FormerForUniversalSegmentation.from_pretrained(model_name)
+        print("Loading Mask2Former model:", model_name)
+        if params.get('encoder_weights', None) is None:
+            # config = AutoConfig.from_pretrained(model_name)
+            # config.use_pretrained_backbone = False
+            # self.model = Mask2FormerForUniversalSegmentation(config)
+            self.model = Mask2FormerForUniversalSegmentation.from_pretrained(model_name)
+            # reinitialize the model weights
+            # self.model.init_weights()
+            # self.model.apply(self.model._init_weights)
+            # self.model = AutoModel.from_config(config)
+        elif params.get('encoder_weights', None) == "coco-instance":
+            self.model = Mask2FormerForUniversalSegmentation.from_pretrained(model_name)
+        else:
+            print("unrecognized encoder_weights:", params.get('encoder_weights', None))
+            
         
         # Adjust the class predictor for binary segmentation (1 class + background)
         # Mask2Former usually has N+1 classes (N classes + 'no object')
@@ -26,8 +39,34 @@ class Mask2Former(VisionBase):
         # replace the classification head.
         hidden_dim = self.model.config.hidden_dim
         self.model.class_predictor = nn.Linear(hidden_dim, 2)
+
+        # # === START TEMPORARY VERIFICATION ===
+        # import sys
+        # print(f"\n\n{'='*20} WEIGHT VERIFICATION {'='*20}")
+        # print(f"Config Mode: {params.get('encoder_weights', 'None (SCRATCH)')}")
+        
+        # first_param = next(self.model.parameters())
+        
+        # print(f"First 5 weights: {first_param.flatten()[:5].tolist()}")
+        # print(f"Sum of first layer: {first_param.sum().item():.4f}")
+        # print(f"{'='*60}\n")
+        
+        # sys.exit(0)
+        # # === END TEMPORARY VERIFICATION ===
         
         self.to(device=device)
+    
+    # def _init_weights(self, module):
+    #     """ Initialize the weights """
+    #     if isinstance(module, (nn.Linear, nn.Embedding)):
+    #         # Slightly different from the TF version which uses truncated_normal for initialization
+    #         # cf https://github.com/pytorch/pytorch/pull/5617
+    #         module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+    #     elif isinstance(module, nn.LayerNorm):
+    #         module.bias.data.zero_()
+    #         module.weight.data.fill_(1.0)
+    #     if isinstance(module, nn.Linear) and module.bias is not None:
+    #         module.bias.data.zero_()
 
     def forward(self, x, return_loss=False):
         image = x['image'] # (B, 3, H, W)
