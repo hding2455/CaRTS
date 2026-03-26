@@ -1,0 +1,2 @@
+from .unetplusplus_segstrongc_custom_augment import cfg as UNetPlusPlus_SegSTRONGC_Custom_Augment
+from .mask2former_segstrongc_custom_augment import cfg as Mask2Former_SegSTRONGC_Custom_Augment  

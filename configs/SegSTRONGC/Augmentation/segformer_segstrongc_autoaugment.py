@@ -15,5 +15,4 @@ class cfg:
             output_size = size,
             criterion = loss,
             train_params = train_params
-        )
-    )
+        ))

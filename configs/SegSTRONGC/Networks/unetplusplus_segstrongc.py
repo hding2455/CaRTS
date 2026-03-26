@@ -1,4 +1,3 @@
-
 from .common_confg import *
 
 class cfg:
@@ -6,11 +5,11 @@ class cfg:
     validation_dataset = validation_dataset
     test_dataset = test_dataset
     model = dict(
-        name = "DeepLabv3_plus",
+        name = "UnetPlusPlus",
         params = dict(
-            InputChannels = 3,
-            os = 16, 
+            input_dim = 3,
+            encoder_name = "resnet101",
+            encoder_weights = None,
             target_size = size,
             criterion = loss,
-            pretrained = True,
             train_params = train_params))

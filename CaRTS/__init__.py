@@ -1,10 +1,10 @@
-from .carts import *
+#from .carts import *
 from .vision import *
 from .evaluation import *
 from .loss import *
 
 model_dict = {
-                "CaRTS": CaRTS,
+#                "CaRTS": CaRTS,
                 "Unet": Unet,
                 "HRNet": HRNet,
                 "STM": STM,
@@ -14,6 +14,8 @@ model_dict = {
                 "DeepLabv3_plus": DeepLabv3_plus,
                 "Segformer": Segformer,
                 "SegmentationTTAWrapper": SegmentationTTAWrapper,
+                "UnetPlusPlus": UnetPlusPlus,
+                "Mask2Former": Mask2Former,
             }
 
 def build_model(model, device):

@@ -1,7 +1,7 @@
 #NET=Segformer_SegSTRONGC
 #CHECKPOINT=checkpoints/segformer_segstrongc/model_39.pth
 echo $NET BG Change
-python validate.py --config $NET --model_path $CHECKPOINT --test True --domain bg_change --save_dir /workspace/data/SegSTRONG-C/results/bg_change/$NET
+python validate.py --config $NET --model_path $           --test True --domain bg_change --save_dir /workspace/data/SegSTRONG-C/results/bg_change/$NET
 echo $NET Regular
 python validate.py --config $NET --model_path $CHECKPOINT  --test True --domain regular --save_dir /workspace/data/SegSTRONG-C/results/regular/$NET
 echo $NET Blood
