@@ -57,6 +57,12 @@ We only used one GPU for training and inference so we haven't implement multi-gp
 
 Please refer to our ([website](segstrongc.cs.jhu.edu)) for registration and data downloading
 
+## Checkpoints:
+
+We provided the latest checkpoint here:
+[Mask2Former](https://drive.google.com/file/d/1Jd6NORZuEcOEFesUDW4-3ddH7nux3w1T/view?usp=sharing)
+[UNetPlusPlus](https://drive.google.com/file/d/1Y2zhKuOMiDkjlRjLHwwvzVxd5kwCEz2-/view?usp=drive_link)
+
 ## Citations
 Please consider citing our papers in your publications if this repo helps you. 
 ```
